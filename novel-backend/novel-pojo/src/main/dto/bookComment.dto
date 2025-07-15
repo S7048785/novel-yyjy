@@ -1,0 +1,42 @@
+export com.novel.po.comment.BookComment
+    -> package com.novel.dto.comment
+import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
+
+@Schema(description = "书评")
+BookCommentView {
+    id
+    flat(user) {
+        id as userId
+        nickName?
+        userPhoto as avatar
+    }
+    content
+    children: List<*>?
+    childrenCount
+    createTime
+}
+
+@Schema(description = "书评")
+BookSubCommentView {
+    id
+    flat(user) {
+        id as userId
+        nickName
+        userPhoto as avatar
+    }
+    replyNickName
+    content
+    createTime
+}
+
+@Schema(description = "书评")
+input BookCommentInput {
+    @NotBlank
+    bookId: Long
+    @NotBlank
+    content
+    replyNickName
+    parentId: Long?
+    rootParentId: Long?
+}

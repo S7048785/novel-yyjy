@@ -1,0 +1,57 @@
+export com.novel.po.user.UserInfo
+    -> package com.novel.dto.user
+import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
+
+
+@Schema(description = "用户登录信息")
+UserLoginView {
+    id
+    @Schema(description = "昵称")
+    nickName
+    @Schema(description = "用户头像")
+    userPhoto
+    @Schema(description = "邮箱")
+    email
+    token: String?
+}
+
+input UserLoginInput {
+    @NotBlank(message = "邮箱不能为空")
+    @Schema(description = "邮箱")
+    email
+
+    @NotBlank(message = "密码不能为空")
+    @Schema(description = "密码")
+    password
+
+
+    @NotBlank(message = "验证码不能为空")
+    @Schema(description = "验证码")
+    captcha: String?
+}
+
+input UserRegisterInput {
+    @NotBlank(message = "邮箱不能为空")
+    @Schema(description = "邮箱")
+    email
+
+    @NotBlank(message = "密码不能为空")
+    @Schema(description = "密码")
+    password
+
+    @NotBlank(message = "昵称不能为空")
+    @Schema(description = "昵称")
+    nickName
+
+    @NotBlank(message = "验证码不能为空")
+    @Schema(description = "验证码")
+    captcha: String?
+}
+
+UserInfoView {
+    id
+    email
+    nickName
+    userPhoto
+}

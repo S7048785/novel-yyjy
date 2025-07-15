@@ -1,0 +1,19 @@
+export com.novel.po.user.UserReadHistory
+    -> package com.novel.dto.user
+import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
+
+BookReadHistoryView {
+    id,
+    flat(preContent) {
+        id as chapterId
+        chapterName
+    }
+    updateTime
+    flat(book) {
+        id as bookId
+        bookName
+        categoryName
+        authorName
+    }
+}

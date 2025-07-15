@@ -1,0 +1,46 @@
+novel:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: localhost
+    port: 3306
+    database: novel
+    username: root
+    password:
+  jwt:
+    # jwt签名加密时使用的密钥
+    secret-key: awsl
+    # jwt过期时间 2小时 (=2 * 60 * 60 * 1000)
+    ttl: 7200000
+  front: http://localhost:5173
+  oss:
+    endpoint: http://oss-cn-beijing.aliyuncs.com
+    bucket-name:
+    region:
+  exclude:
+    path:
+      - /user/login
+      - /user/register
+      - /user/info
+      - /news/**
+      - /home/**
+      - /book/category
+      - /book/all
+      - /book/info/{id}
+      - /book/chapter
+      - /book/random
+      - /book/rank
+      - /book/content
+      - /captcha
+      - /comment/top
+      - /comment/child
+
+jimmer:
+  dialect: org.babyfish.jimmer.sql.dialect.MySqlDialect
+  show-sql: false
+  pretty-sql: false
+  database-validation-mode: ERROR
+
+springdoc:
+  # 默认是false，需要设置为true
+  default-flat-param-object: true
+

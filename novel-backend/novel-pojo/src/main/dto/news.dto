@@ -1,0 +1,21 @@
+export com.novel.po.news.NewsInfo
+    -> package com.novel.dto.news
+
+NewsInfoView {
+    id,
+    categoryId,
+    categoryName,
+    sourceName,
+    title,
+    updateTime,
+    flat(newsContent) {
+        content
+    }
+}
+
+LaetstNewsView {
+    id,
+    categoryName,
+    title,
+    updateTime
+}

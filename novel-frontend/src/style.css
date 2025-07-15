@@ -1,0 +1,11 @@
+/* 文本超出隐藏 */
+.text-hidden {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}

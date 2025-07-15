@@ -1,0 +1,126 @@
+export com.novel.po.book.BookInfo
+    -> package com.novel.dto.book
+import io.swagger.v3.oas.annotations.media.Schema
+
+@Schema(description = "首页小说排名")
+HomeBookRankView {
+    id
+    @Schema(description = "封面url")
+    picUrl
+    @Schema(description = "书名")
+    bookName
+    @Schema(description = "简介")
+    bookDesc
+}
+
+@Schema(description = "最近更新")
+LastUpdateBookView {
+    id
+    @Schema(description = "分类")
+    categoryName
+    @Schema(description = "书名")
+    bookName
+    @Schema(description = "最新章节")
+    lastChapterName
+    @Schema(description = "作者")
+    authorName
+    @Schema(description = "更新时间")
+    lastChapterUpdateTime
+}
+
+@Schema(description = "最新入库")
+LastInsertBookView {
+    id
+    @Schema(description = "分类")
+    categoryName
+    @Schema(description = "书名")
+    bookName
+    @Schema(description = "作者")
+    authorName
+    @Schema(description = "入库时间")
+    createTime
+}
+
+@Schema(description = "首页小说")
+AllBookView {
+    id
+    @Schema(description = "分类")
+    categoryName
+    @Schema(description = "书名")
+    bookName
+    @Schema(description = "最后章节名")
+    lastChapterName
+    @Schema(description = "作者")
+    authorName
+    @Schema(description = "字数")
+    wordCount
+}
+
+input AllBookQueryInput {
+    @Schema(description = "频道id")
+    channelId: Int?
+    @Schema(description = "分类id")
+    categoryId
+    @Schema(description = "小说状态 0-连载中 1-完结")
+    overState: Int?
+    @Schema(description = "字数 0. 30万以下 1. 30-50万 2. 50-100万 3. 100万以上")
+    wordCountState: Int?
+    @Schema(description = "几天前更新")
+    updateDay: Int?
+    @Schema(description = "排序方式 0-更新时间 1-总字数 2-点击量")
+    sortState: Int?
+}
+
+BookInfoView {
+    id
+    @Schema(description = "书名")
+    bookName
+    @Schema(description = "作者")
+    authorName
+    @Schema(description = "简介")
+    bookDesc
+    @Schema(description = "小说状态 0-连载中 1-已完结")
+    bookStatus
+    @Schema(description = "封面url")
+    picUrl
+    @Schema(description = "分类id")
+    categoryId
+    @Schema(description = "分类")
+    categoryName
+    @Schema(description = "最新章节更新时间")
+    lastChapterUpdateTime
+    @Schema(description = "最新章节id")
+    lastChapterId
+    @Schema(description = "更新章节名")
+    lastChapterName
+    @Schema(description = "点击量")
+    visitCount
+    @Schema(description = "总字数")
+    wordCount
+    @Schema(description = "评论数")
+    commentCount
+}
+
+@Schema(description = "最近更新")
+BookRankView {
+    id
+    @Schema(description = "分类")
+    categoryName
+    @Schema(description = "书名")
+    bookName
+    @Schema(description = "最新章节")
+    lastChapterName
+    @Schema(description = "作者")
+    authorName
+    @Schema(description = "字数")
+    wordCount
+}
+
+BookSimpleInfoView {
+    id
+    categoryName
+    bookName
+    lastChapterName
+    lastChapterUpdateTime
+    authorName
+}

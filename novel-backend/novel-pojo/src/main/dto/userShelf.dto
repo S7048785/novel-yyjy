@@ -1,0 +1,16 @@
+export com.novel.po.user.UserBookshelf
+    -> package com.novel.dto.user
+
+UserBookShelfView {
+    id
+    flat(preContent) {
+        id as chapterId
+        chapterName
+    }
+    flat(book) {
+        id as bookId
+        bookName
+        categoryName
+        authorName
+    }
+}

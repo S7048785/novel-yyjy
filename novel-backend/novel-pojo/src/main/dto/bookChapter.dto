@@ -1,0 +1,35 @@
+export com.novel.po.book.BookChapter
+    -> package com.novel.dto.book
+import io.swagger.v3.oas.annotations.media.Schema
+
+BookChapterView {
+    @Schema(description = "章节id")
+    id
+    @Schema(description = "章节名称")
+    chapterName
+    @Schema(description = "更新时间")
+    updateTime
+    @Schema(description = "字数")
+    wordCount
+}
+
+BookChapterContentView {
+    id
+    chapterNum
+    chapterName
+    wordCount
+    createTime
+    flat(book) {
+        categoryName
+        categoryId
+        bookName
+        id as bookId
+        authorName
+    }
+    flat(content) {
+        content
+    }
+    prevChapterId: String?
+    nextChapterId: String?
+    isInBookShelf: Int?
+}

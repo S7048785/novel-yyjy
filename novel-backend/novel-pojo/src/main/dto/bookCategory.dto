@@ -1,0 +1,11 @@
+export com.novel.po.book.BookCategory
+    -> package com.novel.dto.book
+import io.swagger.v3.oas.annotations.media.Schema
+
+@Schema(description = "小说类别")
+BookCategoryView {
+    @Schema(description = "类别id")
+    id
+    @Schema(description = "类别名称")
+    name
+}
