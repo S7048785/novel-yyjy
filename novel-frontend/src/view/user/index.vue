@@ -15,11 +15,6 @@ const menuState = reactive([
 		icon: ReadOutlined,
 		label: '我的书架',
 		to: '/user/bookcase'
-	},
-	{
-		icon: CommentOutlined,
-		label: '我的书评',
-		to: '/user/comment'
 	}
 ])
 
