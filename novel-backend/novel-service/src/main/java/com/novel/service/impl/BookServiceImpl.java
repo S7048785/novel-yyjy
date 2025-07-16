@@ -111,9 +111,19 @@ public class BookServiceImpl implements BookService {
 	}
 	
 	@Override
-	public BookStateVO getBookState(long bookId) {
-		Long userId = BaseContext.getCurrentId();
-		boolean exists = bookRepository.isInBookshelf(userId, bookId);
-		return new BookStateVO(exists ? 1 : 0);
+	public BookStateVO getBookState(String token, long bookId) {
+		try {
+			String userId = JwtUtils.parseJwt(token);
+			boolean exists = bookRepository.isInBookshelf(Long.valueOf(userId), bookId);
+			return new BookStateVO(exists ? 1 : 0);
+		} catch (Exception e) {
+			return new BookStateVO(0);
+			
+		}
+	}
+	
+	@Override
+	public List<BookInfoSearchView> search(String name) {
+		return bookRepository.search(name);
 	}
 }

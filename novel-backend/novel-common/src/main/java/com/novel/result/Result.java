@@ -21,6 +21,7 @@ public class Result<T> {
 	public static <T> Result<T> ok(T data) {
 		Result<T> result = new Result<>();
 		result.setCode(1);
+		result.setMsg("ok");
 		result.setData(data);
 		return result;
 	}

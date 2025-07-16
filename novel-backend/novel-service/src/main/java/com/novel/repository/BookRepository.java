@@ -294,4 +294,14 @@ public class BookRepository {
 				                 .where(UserBookshelfTable.$.state().eq(0))
 				                 .exists();
 	}
+	
+	public List<BookInfoSearchView> search(String name) {
+		return sqlClient.createQuery(BookInfoTable.$)
+				                            .where(Predicate.or(
+						                            BookInfoTable.$.bookName().like(name),
+						                            BookInfoTable.$.authorName().like(name)
+				                            ))
+				                            .select(BookInfoTable.$.fetch(BookInfoSearchView.class))
+				                            .execute();
+	}
 }

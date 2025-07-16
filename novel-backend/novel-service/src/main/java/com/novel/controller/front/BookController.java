@@ -75,7 +75,13 @@ public class BookController {
 	
 	@Operation(summary = "获取小说状态")
 	@GetMapping("state")
-	public Result<BookStateVO> getBookState(long bookId) {
-		return Result.ok(bookService.getBookState(bookId));
+	public Result<BookStateVO> getBookState(@RequestHeader("Authorization") String token, long bookId) {
+		return Result.ok(bookService.getBookState(token, bookId));
+	}
+	
+	@Operation(summary = "小说搜索")
+	@GetMapping("search")
+	public Result<List<BookInfoSearchView>> search(String name) {
+		return Result.ok(bookService.search(name));
 	}
 }

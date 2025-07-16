@@ -112,11 +112,18 @@ public class UserRepository {
 	}
 	
 	public void updateBookshelf(int optType, Long userId, long bookId) {
+		List<Long> execute = sqlClient.createQuery(UserReadHistoryTable.$)
+				                     .where(UserReadHistoryTable.$.userId().eq(userId))
+				                     .where(UserReadHistoryTable.$.bookId().eq(bookId))
+				                     .select(UserReadHistoryTable.$.preContentId())
+				                     .execute();
+		
 		sqlClient.save(UserBookshelfDraft.$.produce(draft -> {
 			draft.setUserId(userId)
 					.setBookId(bookId)
 					.setState(optType == 0 ? 0 : 1)
-					.setUpdateTime(LocalDateTime.now());
+					.setUpdateTime(LocalDateTime.now())
+					.setPreContentId(CollUtil.isEmpty(execute) ? null : execute.get(0));
 		}), SaveMode.UPSERT);
 	}
 }

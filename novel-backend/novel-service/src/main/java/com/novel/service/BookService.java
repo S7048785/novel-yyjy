@@ -23,5 +23,7 @@ public interface BookService {
 	
 	BookChapterContentView getBookContent(String token, long bookId, long chapterId);
 	
-	BookStateVO getBookState(long bookId);
+	BookStateVO getBookState(String token, long bookId);
+	
+	List<BookInfoSearchView> search(String name);
 }
