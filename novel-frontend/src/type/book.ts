@@ -135,3 +135,14 @@ export type BookStateView = {
 	 */
 	isInBookShelf: number;
 }
+
+export type BookInfoSearchView = {
+	id: string;
+	categoryName: string;
+	bookName: string;
+	authorName: string;
+	picUrl: string;
+	bookDesc: string;
+	lastChapterId: string;
+	lastChapterName: string;
+}

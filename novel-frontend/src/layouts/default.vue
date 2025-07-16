@@ -3,6 +3,8 @@ import logo from "@/assets/image/logo.png"
 import emitter from "@/utils/emitter.ts"
 import {useUserStore} from "@/stores/userStore.ts"
 import {message} from "ant-design-vue";
+import {getBookByNameAPI} from "@/api/book.ts";
+const router = useRouter();
 const userStore = useUserStore()
 const route = useRoute()
 const navList = [{
@@ -22,12 +24,18 @@ const navList = [{
 const logout = () => {
 	userStore.logout()
 	message.success("退出成功")
-
+	router.push('/')
 }
 
 const searchRef = ref()
-const onSearch = (value: string) => {
-	console.log(value);
+const onSearch = async (value: string) => {
+	// await getBookByNameAPI(value)
+	router.push({
+		path: '/search',
+		query: {
+			name: value
+		}
+	})
 };
 </script>
 

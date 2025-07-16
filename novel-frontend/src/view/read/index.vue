@@ -65,6 +65,7 @@ const sidebarList = reactive([
 const logout = () => {
 	userStore.logout()
 	message.success("退出成功")
+	router.push('/')
 }
 
 //  内容
@@ -160,6 +161,11 @@ onMounted(async () => {
 									<a-menu-item class="">
 										<div class="text-center">
 											<router-link to="/user/setting" class="dark:text-gray-400!">个人信息</router-link>
+										</div>
+									</a-menu-item>
+									<a-menu-item class="">
+										<div class="text-center">
+											<router-link to="/user/bookcase" class="dark:text-gray-400!">我的书架</router-link>
 										</div>
 									</a-menu-item>
 									<a-menu-item class="">

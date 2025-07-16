@@ -31,7 +31,6 @@ const router = createRouter({
 				},
 				{
 					path: '/info',
-					component: () => import("@/view/book/index.vue"),
 					children: [
 						{
 							path: ':id',
@@ -59,13 +58,17 @@ const router = createRouter({
 							component: () => import('@/view/user/history/index.vue')
 						}
 					]
+				},
+				{
+					path: '/search',
+					name: 'search',
+					component: () => import('@/view/search/index.vue')
 				}
 			]
 		},
 		{
 			path: '/read',
 			name: 'read',
-			component: () => import('@/layouts/content.vue'),
 			children: [
 				{
 					path: ':bookId/:chapterId',

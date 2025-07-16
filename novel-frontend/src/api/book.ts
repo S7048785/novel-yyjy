@@ -2,7 +2,7 @@ import {type PageData, request, type Result} from "@/utils/request.ts";
 import type {
 	AllBookView,
 	BookCategoryView,
-	BookContentView, BookHistoryView,
+	BookContentView, BookHistoryView, BookInfoSearchView,
 	BookInfoView,
 	BookRandomView,
 	BookRankView, BookShelfView, BookStateView
@@ -107,6 +107,16 @@ export const getBookStateAPI = (bookId: string): Result<BookStateView> => {
 		method: 'get',
 		params: {
 			bookId
+		}
+	})
+}
+
+export const getBookByNameAPI = (name: string): Result<BookInfoSearchView[]> => {
+	return request({
+		url: "/book/search",
+		method: 'get',
+		params: {
+			name
 		}
 	})
 }

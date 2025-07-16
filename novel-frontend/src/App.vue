@@ -3,11 +3,12 @@ import Login from "@/components/Login.vue";
 import {getUserInfoAPI} from "@/api/user.ts";
 import {useUserStore} from "@/stores/userStore.ts";
 const userStore = useUserStore();
-
+const router = useRouter()
 const getUserInfo = async () => {
 	const res = await getUserInfoAPI()
 	if (res.code === 0) {
 		userStore.logout();
+		router.push('/search')
 		return;
 	}
 	userStore.setUserInfo(res.data)
@@ -19,7 +20,7 @@ onMounted(() => {
 </script>
 
 <template>
-	<router-view />
+	<router-view :key="$route.fullPath"/>
 	<login />
 
 </template>

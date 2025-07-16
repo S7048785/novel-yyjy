@@ -5,7 +5,10 @@ import dayjs from "dayjs";
 import Comment from "./components/comment.vue";
 import Catalogue from "./components/catalogue.vue";
 import emitter from "@/utils/emitter.ts"
+import {useUserStore} from "@/stores/userStore.ts";
+import {message} from "ant-design-vue";
 
+const userStore = useUserStore()
 const route = useRoute()
 const bookId = route.params.id as string
 // 小说信息
@@ -27,8 +30,14 @@ const getBookState = async () => {
 
 // 添加/移除书架
 const toggleBookState = async () => {
+	if (userStore.user == undefined) {
+		message.warn('请先登录')
+		emitter.emit("open-login")
+		return;
+	}
 	await addOrDelBookShelfAPI(bookState.value!.isInBookShelf, bookId)
 	bookState.value!.isInBookShelf = 1 - bookState.value!.isInBookShelf;
+	message.success(bookState.value!.isInBookShelf === 1 ? '已加入书架' : '已移出书架')
 }
 
 const randomBooks = ref<BookRandomView[]>()
