@@ -57,3 +57,10 @@
 个人书架
 
 ![image-20250718135035559](README.assets/image-20250718135035559.png)
+
+
+
+### 项目参考
+
++ [novel](https://github.com/201206030/novel)
++ [起点中文网](https://www.qidian.com/)
