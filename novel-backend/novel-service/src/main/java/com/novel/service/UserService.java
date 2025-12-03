@@ -1,9 +1,10 @@
 package com.novel.service;
 
-import com.novel.dto.user.*;
-import com.novel.po.user.UserBookshelfTable;
-import com.novel.po.user.UserInfo;
+import com.novel.admin.dto.user.UserAddInput;
+import com.novel.admin.dto.user.UserUpdateInput;
+import com.novel.dto.req.UserPageQueryReq;
 import com.novel.result.PageResult;
+import com.novel.user.dto.user.*;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public interface UserService {
 	
 	void updateAvatar(String url);
 	
-	UserInfoView getUserInfo(String token);
+	UserInfoView getUserInfo();
 	
 	void updateNickName(String nickName);
 	
@@ -22,5 +23,14 @@ public interface UserService {
 	
 	List<UserBookShelfView> listBookshelf();
 	
+	// --------------- Admin ------------------
 	void updateBookshelf(int optType, long bookId);
+	
+	void addUser(UserAddInput user);
+	
+	void updateUser(UserUpdateInput user);
+	
+	void delete(Long id);
+	
+	PageResult<com.novel.admin.dto.user.UserInfoView> page(UserPageQueryReq req);
 }

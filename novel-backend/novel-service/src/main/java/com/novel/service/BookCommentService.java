@@ -1,9 +1,10 @@
 package com.novel.service;
 
-import com.novel.dto.comment.BookCommentInput;
-import com.novel.dto.comment.BookCommentView;
-import com.novel.dto.comment.BookSubCommentView;
+
 import com.novel.result.PageResult;
+import com.novel.user.dto.comment.BookCommentInput;
+import com.novel.user.dto.comment.BookCommentView;
+import com.novel.user.dto.comment.BookSubCommentView;
 
 import java.util.List;
 
@@ -14,5 +15,5 @@ public interface BookCommentService {
 	
 	BookCommentView addBookComment(String ip, String address, BookCommentInput bookComment);
 	
-	void deleteBookComment(Long id);
+	boolean deleteBookComment(Long id);
 }

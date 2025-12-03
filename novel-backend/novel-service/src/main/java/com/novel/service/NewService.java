@@ -1,7 +1,7 @@
 package com.novel.service;
 
-import com.novel.dto.news.LaetstNewsView;
-import com.novel.result.Result;
+
+import com.novel.user.dto.news.LaetstNewsView;
 
 import java.util.List;
 

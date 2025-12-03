@@ -136,6 +136,9 @@ public class IpUtils {
      * @return 国内返回省份或地级市 国外返回国家
      */
   public static String getIpAddress(String ip) {
+    if (ip.startsWith("127")) {
+      return "未知";
+    }
     String cityInfo = IpUtils.getCityInfo(ip);
     String[] split = null;
 

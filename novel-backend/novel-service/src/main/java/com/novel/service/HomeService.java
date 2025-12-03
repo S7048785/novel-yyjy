@@ -1,17 +1,17 @@
 package com.novel.service;
 
-import com.novel.dto.book.HomeBookRankView;
-import com.novel.dto.book.LastInsertBookView;
-import com.novel.dto.book.LastUpdateBookView;
-import com.novel.dto.home.HomeBookView;
-import com.novel.result.Result;
+import com.novel.user.dto.book.HomeBookRankView;
+import com.novel.user.dto.book.LastInsertBookView;
+import com.novel.user.dto.book.LastUpdateBookView;
+import com.novel.user.dto.book.VisitRankBookView;
+import com.novel.user.dto.home.HomeBookView;
 
 import java.util.List;
 
 public interface HomeService {
 	List<HomeBookView> listHomeBooks();
 	
-	List<HomeBookRankView> listBookVisitRank();
+	List<VisitRankBookView> listBookVisitRank();
 	
 	List<HomeBookRankView> listNewestRankBooks();
 	
