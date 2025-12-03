@@ -1,15 +1,17 @@
 package com.novel.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
+import com.novel.admin.dto.user.UserAddInput;
+import com.novel.admin.dto.user.UserUpdateInput;
 import com.novel.constant.MessageConstant;
-import com.novel.context.BaseContext;
-import com.novel.dto.user.*;
+import com.novel.dto.req.UserPageQueryReq;
 import com.novel.exception.BaseException;
-import com.novel.po.user.UserBookshelfTable;
 import com.novel.po.user.UserInfo;
 import com.novel.po.user.UserInfoDraft;
 import com.novel.repository.UserRepository;
 import com.novel.result.PageResult;
 import com.novel.service.UserService;
+import com.novel.user.dto.user.*;
 import com.novel.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -26,17 +27,12 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 	@Override
 	public UserLoginView login(UserLoginInput userLoginInput) {
-		
 		// 查询用户信息
 		UserInfo userInfo = userRepository.getUserInfoByEmail(userLoginInput.getEmail());
 		
 		// 校验用户密码
 		if (userInfo.password().equals(userLoginInput.getPassword())) {
-			UserLoginView userLoginView = new UserLoginView(userInfo);
-			// 生成token
-			String token = JwtUtils.createJwt(String.valueOf(userInfo.id()));
-			userLoginView.setToken(token);
-			return userLoginView;
+			return new UserLoginView(userInfo);
 		}
 		
 		throw new BaseException( MessageConstant.ACCOUNT_OR_PASSWORD_NOT_FOUND);
@@ -74,20 +70,16 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	public UserInfoView getUserInfo(String token) {
-		String userId = null;
-		try {
-			userId = JwtUtils.parseJwt(token);
-		} catch (Exception e) {
-			throw new BaseException("验证失败");
-		}
+	public UserInfoView getUserInfo() {
+		long userId = StpUtil.getLoginIdAsLong();
+		
 		UserInfo userInfo = userRepository.getUserInfo(userId);
 		return new UserInfoView(userInfo);
 	}
 	
 	@Override
 	public void updateNickName(String nickName) {
-		Long userId = BaseContext.getCurrentId();
+		Long userId = StpUtil.getLoginIdAsLong();
 		userRepository.updateNickName(userId, nickName);
 	}
 	
@@ -103,7 +95,27 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public void updateBookshelf(int optType, long bookId) {
-		Long userId = BaseContext.getCurrentId();
+		Long userId = StpUtil.getLoginIdAsLong();
 		userRepository.updateBookshelf(optType, userId, bookId);
+	}
+	
+	@Override
+	public void addUser(UserAddInput user) {
+		userRepository.save(UserInfoDraft.$.produce(user.toEntity(),draft -> draft.setUpdateTime(LocalDateTime.now())));
+	}
+	
+	@Override
+	public void updateUser(UserUpdateInput user) {
+		userRepository.updateUser(user);
+	}
+	
+	@Override
+	public void delete(Long id) {
+		userRepository.delete(id);
+	}
+	
+	@Override
+	public PageResult<com.novel.admin.dto.user.UserInfoView> page(UserPageQueryReq req) {
+		return userRepository.page(req);
 	}
 }

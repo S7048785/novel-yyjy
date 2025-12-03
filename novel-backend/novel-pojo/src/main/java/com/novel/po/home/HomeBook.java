@@ -29,6 +29,19 @@ public interface HomeBook {
 	String type();
 	
 	/**
+	 * 推荐简介
+	 * @return
+	 */
+	@Null
+	String intro();
+	
+	/**
+	 * 推荐标签
+	 */
+	@Null
+	String tag();
+	
+	/**
 	 * 推荐排序
 	 */
 	int sort();

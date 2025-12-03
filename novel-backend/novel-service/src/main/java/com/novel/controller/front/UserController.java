@@ -1,11 +1,12 @@
 package com.novel.controller.front;
 
-import com.novel.dto.user.*;
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.stp.StpUtil;
+import com.novel.context.BaseContext;
 import com.novel.exception.BaseException;
-import com.novel.po.user.UserBookshelfTable;
-import com.novel.result.PageResult;
 import com.novel.result.Result;
 import com.novel.service.UserService;
+import com.novel.user.dto.user.*;
 import com.novel.utils.AliyunOSSUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,15 +14,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -41,6 +42,14 @@ public class UserController {
 	@Operation(summary = "登录")
 	@PostMapping("/login")
 	public Result<UserLoginView> login(HttpServletRequest request, @Validated @RequestBody UserLoginInput userLoginInput) {
+		
+		// 获取防盗链
+		//String referer = request.getHeader("Referer");
+		//if ("http://localhost:8081/doc.html".equals(referer)) {
+		//	StpUtil.login(4L);
+		//	return Result.ok();
+		//}
+		
 		String captcha = (String) request.getSession().getAttribute("captcha");
 		String captcha1 = userLoginInput.getCaptcha();
 		log.info("captcha: {}, captcha1: {}", captcha, captcha1);
@@ -48,6 +57,7 @@ public class UserController {
 			return Result.fail("验证码错误");
 		}
 		UserLoginView user = userService.login(userLoginInput);
+		StpUtil.login(user.getId());
 		return Result.ok(user);
 	}
 	
@@ -65,6 +75,7 @@ public class UserController {
 		return Result.ok(user);
 	}
 	
+	@SaCheckLogin
 	@Operation(summary = "上传头像")
 	@PostMapping("/upload")
 	public Result<String> upload(@RequestPart MultipartFile file) throws Exception {
@@ -82,11 +93,12 @@ public class UserController {
 	
 	@Operation(summary = "获取用户信息")
 	@GetMapping("/info")
-	public Result<UserInfoView> getUserInfo(@RequestHeader("Authorization") String token) {
-		UserInfoView user  = userService.getUserInfo(token);
+	public Result<UserInfoView> getUserInfo() {
+		UserInfoView user = userService.getUserInfo();
 		return Result.ok(user);
 	}
 	
+	@SaCheckLogin
 	@Operation(summary = "修改昵称")
 	@PutMapping("/nickName")
 	public Result<String> updateNickName(@Validated @Size(min = 2, max = 10, message = "昵称长度必须在2-10之间") String nickName) {
@@ -94,18 +106,21 @@ public class UserController {
 		return Result.ok();
 	}
 	
+	@SaCheckLogin
 	@Operation(summary = "历史浏览")
 	@GetMapping("/history")
 	public Result<List<BookReadHistoryView>> listHistory() {
 		return Result.ok(userService.listHistory());
 	}
 	
+	@SaCheckLogin
 	@Operation(summary = "书架")
 	@GetMapping("/bookshelf")
 	public Result<List<UserBookShelfView>> listBookshelf() {
 		return Result.ok(userService.listBookshelf());
 	}
 	
+	@SaCheckLogin
 	@Operation(summary = "添加/移除书架")
 	@PutMapping("/bookshelf")
 	public Result<Void> updateBookshelf(int optType, long bookId) {

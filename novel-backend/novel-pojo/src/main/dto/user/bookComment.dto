@@ -1,9 +1,9 @@
 export com.novel.po.comment.BookComment
-    -> package com.novel.dto.comment
+    -> package com.novel.user.dto.comment
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 
-@Schema(description = "书评")
+@Schema(description = "根评论")
 BookCommentView {
     id
     flat(user) {
@@ -17,7 +17,7 @@ BookCommentView {
     createTime
 }
 
-@Schema(description = "书评")
+@Schema(description = "二级评论")
 BookSubCommentView {
     id
     flat(user) {
@@ -30,7 +30,7 @@ BookSubCommentView {
     createTime
 }
 
-@Schema(description = "书评")
+@Schema(description = "添加书评")
 input BookCommentInput {
     @NotBlank
     bookId: Long

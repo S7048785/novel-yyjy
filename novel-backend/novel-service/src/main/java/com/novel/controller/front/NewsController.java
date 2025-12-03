@@ -1,8 +1,8 @@
 package com.novel.controller.front;
 
-import com.novel.dto.news.LaetstNewsView;
 import com.novel.result.Result;
 import com.novel.service.NewService;
+import com.novel.user.dto.news.LaetstNewsView;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

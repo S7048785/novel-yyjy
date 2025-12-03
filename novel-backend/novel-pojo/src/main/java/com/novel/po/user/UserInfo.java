@@ -1,5 +1,6 @@
 package com.novel.po.user;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import org.babyfish.jimmer.jackson.JsonConverter;
 import org.babyfish.jimmer.jackson.LongToStringConverter;
@@ -46,6 +47,12 @@ public interface UserInfo {
 	 */
 	@Null
 	String userPhoto();
+	
+	/**
+	 * 用户权限
+	 */
+	@NotNull
+	String role();
 	
 	/**
 	 * 用户状态;0-正常

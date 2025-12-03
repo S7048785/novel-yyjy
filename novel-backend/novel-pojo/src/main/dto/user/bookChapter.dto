@@ -1,5 +1,5 @@
 export com.novel.po.book.BookChapter
-    -> package com.novel.dto.book
+    -> package com.novel.user.dto.book
 import io.swagger.v3.oas.annotations.media.Schema
 
 BookChapterView {
@@ -7,6 +7,8 @@ BookChapterView {
     id
     @Schema(description = "章节名称")
     chapterName
+    @Schema(description = "创建时间")
+    createTime
     @Schema(description = "更新时间")
     updateTime
     @Schema(description = "字数")

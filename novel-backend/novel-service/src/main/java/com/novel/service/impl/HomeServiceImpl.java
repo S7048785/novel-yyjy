@@ -4,18 +4,14 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.novel.constant.CacheConstant;
-import com.novel.dto.book.HomeBookRankView;
-import com.novel.dto.book.LastInsertBookView;
-import com.novel.dto.book.LastUpdateBookView;
-import com.novel.dto.home.HomeBookView;
-import com.novel.po.home.HomeBookDraft;
-import com.novel.po.home.HomeBookTable;
 import com.novel.repository.BookRepository;
 import com.novel.service.HomeService;
-import org.babyfish.jimmer.ImmutableObjects;
-import org.babyfish.jimmer.sql.Serialized;
+import com.novel.user.dto.book.HomeBookRankView;
+import com.novel.user.dto.book.LastInsertBookView;
+import com.novel.user.dto.book.LastUpdateBookView;
+import com.novel.user.dto.book.VisitRankBookView;
+import com.novel.user.dto.home.HomeBookView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +40,7 @@ public class HomeServiceImpl implements HomeService {
 	}
 	
 	@Override
-	public List<HomeBookRankView> listBookVisitRank() {
+	public List<VisitRankBookView> listBookVisitRank() {
 		return bookRepository.listBookVisitRank(10);
 	}
 	

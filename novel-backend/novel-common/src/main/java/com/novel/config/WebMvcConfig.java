@@ -1,5 +1,6 @@
 package com.novel.config;
 
+import cn.dev33.satoken.interceptor.SaInterceptor;
 import com.novel.interceptor.JwtTokenInterceptor;
 import com.novel.properties.ExcludePathProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +18,28 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(new JwtTokenInterceptor())
+		//registry.addInterceptor(new JwtTokenInterceptor())
+		//		.addPathPatterns("/**")
+		//		.excludePathPatterns(
+		//				"/doc.html",
+		//				"/webjars/**",
+		//				"swagger-ui/**",
+		//				"/swagger-resources/**",
+		//				"/v3/**").excludePathPatterns(excludePathProperties.getPath());
+		//WebMvcConfigurer.super.addInterceptors(registry);
+		
+		registry.addInterceptor(new SaInterceptor())
+				// 拦截所有路径
 				.addPathPatterns("/**")
+				// 排除路径
 				.excludePathPatterns(
+						// Swagger相关路径
 						"/doc.html",
 						"/webjars/**",
-						"swagger-ui/**",
 						"/swagger-resources/**",
-						"/v3/**").excludePathPatterns(excludePathProperties.getPath());
-		WebMvcConfigurer.super.addInterceptors(registry);
+						"/v3/**",
+						"/favicon.ico"
+				).excludePathPatterns(excludePathProperties.getPath());;
 	}
 	
 	// 如果上面的配置仍然doc.html空白404，就用下面这个

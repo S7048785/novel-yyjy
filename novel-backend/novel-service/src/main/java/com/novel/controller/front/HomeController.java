@@ -1,11 +1,12 @@
 package com.novel.controller.front;
 
-import com.novel.dto.book.HomeBookRankView;
-import com.novel.dto.book.LastInsertBookView;
-import com.novel.dto.book.LastUpdateBookView;
-import com.novel.dto.home.HomeBookView;
 import com.novel.result.Result;
 import com.novel.service.HomeService;
+import com.novel.user.dto.book.HomeBookRankView;
+import com.novel.user.dto.book.LastInsertBookView;
+import com.novel.user.dto.book.LastUpdateBookView;
+import com.novel.user.dto.book.VisitRankBookView;
+import com.novel.user.dto.home.HomeBookView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class HomeController {
 
 	@Operation(summary = "首页小说点击排行")
 	@GetMapping("visit-rank")
-	public Result<List<HomeBookRankView>> listBookVisitRank() {
+	public Result<List<VisitRankBookView>> listBookVisitRank() {
 		return Result.ok(homeService.listBookVisitRank());
 	}
 	

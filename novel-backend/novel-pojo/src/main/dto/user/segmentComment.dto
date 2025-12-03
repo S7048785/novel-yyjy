@@ -1,0 +1,34 @@
+export com.novel.po.comment.SegmentComment
+    -> package com.novel.user.dto.comment
+
+import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
+
+@Schema(description = "添加章节评论")
+input AddChapterComment {
+    @Schema(description = "小说ID")
+    @NotBlank
+    bookId: Long
+    @Schema(description = "章节ID")
+    @NotBlank
+    chapterId: Long
+    @Schema(description = "内容")
+    @NotBlank
+    content
+    segmentNum
+}
+
+@Schema(description = "段落评论")
+SegmentCommentView {
+    id
+    flat(user) {
+        id as userId
+        nickName
+        userPhoto as avatar
+    }
+    content
+    level
+    likeCount
+    createTime
+    ipAddress
+}

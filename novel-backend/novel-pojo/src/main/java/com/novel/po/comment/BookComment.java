@@ -7,6 +7,7 @@ import org.babyfish.jimmer.Formula;
 import org.babyfish.jimmer.jackson.JsonConverter;
 import org.babyfish.jimmer.jackson.LongToStringConverter;
 import org.babyfish.jimmer.sql.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,7 +30,6 @@ public interface BookComment {
 	/**
 	 * 评论小说ID
 	 */
-	@Key
 	@ManyToOne
 	@JoinColumn(name = "book_id")
 	BookInfo book();
@@ -37,7 +37,6 @@ public interface BookComment {
 	/**
 	 * 评论用户ID
 	 */
-	@Key
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	UserInfo user();
@@ -65,6 +64,7 @@ public interface BookComment {
 	 */
 	@ManyToOne
 	@Null
+	@OnDissociate(DissociateAction.SET_NULL)
 	BookComment parent();
 	
 	/**
@@ -72,6 +72,7 @@ public interface BookComment {
 	 */
 	@ManyToOne
 	@Null
+	@OnDissociate(DissociateAction.DELETE)
 	BookComment rootParent();
 	
 	@OneToMany(mappedBy = "parent")

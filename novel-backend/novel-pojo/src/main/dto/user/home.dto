@@ -1,10 +1,12 @@
 export com.novel.po.home.HomeBook
-    -> package com.novel.dto.home
+    -> package com.novel.user.dto.home
 
 import io.swagger.v3.oas.annotations.media.Schema
 HomeBookView {
     @Schema(description = "类型;0-轮播图 1-顶部栏 2-本周强推 3-热门推荐 4-精品推荐")
     type
+    intro
+    tag
     flat(book) {
         @Schema(description = "小说id")
         id as bookId

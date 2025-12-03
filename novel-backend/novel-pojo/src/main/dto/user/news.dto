@@ -1,5 +1,5 @@
 export com.novel.po.news.NewsInfo
-    -> package com.novel.dto.news
+    -> package com.novel.user.dto.news
 
 NewsInfoView {
     id,

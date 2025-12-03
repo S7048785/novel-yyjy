@@ -1,5 +1,6 @@
 package com.novel.handler;
 
+import cn.dev33.satoken.exception.NotLoginException;
 import com.novel.exception.BaseException;
 import com.novel.exception.UserAlreadyExistsException;
 import com.novel.result.Result;
@@ -32,10 +33,15 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler
 	public Result handleBaseException(BaseException e) {
-		log.error("异常信息: {}", e.getMessage());
+		//log.error("异常信息: {}", e.getMessage());
 		return Result.fail(e.getMessage());
 	}
 	
+	/**
+	 * 捕获参数验证失败的异常
+	 * @param e
+	 * @return
+	 */
 	@ExceptionHandler
 	public Result handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
 		BindingResult bindingResult = e.getBindingResult();
@@ -47,5 +53,10 @@ public class GlobalExceptionHandler {
 		});
 		log.error("参数验证失败：{}", errorMsg);
 		return Result.fail(String.join(";", errorMsg));
+	}
+	
+	@ExceptionHandler
+	public Result handleNotLoginException(NotLoginException e) {
+		return Result.fail(e.getMessage());
 	}
 }

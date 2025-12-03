@@ -1,0 +1,12 @@
+export com.novel.po.chapterSummary.ChapterSummary
+    -> package com.novel.user.dto.chapterSummary
+import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
+
+@Schema(description = "章节概要")
+ChapterSummaryView {
+    @Schema(description = "段落号")
+    segmentNum
+    @Schema(description = "评论量")
+    commentNum
+}

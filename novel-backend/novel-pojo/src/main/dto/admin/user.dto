@@ -1,0 +1,44 @@
+export com.novel.po.user.UserInfo
+    -> package com.novel.admin.dto.user
+import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
+
+@Schema(description = "用户信息")
+UserInfoView {
+    #allScalars
+    -password
+}
+
+@Schema(description = "用户信息添加")
+input UserAddInput {
+    @NotBlank
+    email
+    @NotBlank
+    password
+    @NotBlank
+    nickName
+    userPhoto
+    @NotBlank
+    @Pattern(regexp = "^(admin|user)$", message = "role字段只能是admin或user")
+    role
+    status
+    createTime
+}
+
+@Schema(description = "用户信息添加和编辑")
+input UserUpdateInput {
+    @NotBlank
+    id
+    @NotBlank
+    email
+    @NotBlank
+    password
+    @NotBlank
+    nickName
+    userPhoto
+    @NotBlank
+    @Pattern(regexp = "^(admin|user)$", message = "role字段只能是admin或user")
+    role
+    status
+}

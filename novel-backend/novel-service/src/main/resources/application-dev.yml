@@ -5,7 +5,7 @@ novel:
     port: 3306
     database: novel
     username: root
-    password:
+    password: 5211314
   jwt:
     # jwt签名加密时使用的密钥
     secret-key: awsl
@@ -14,8 +14,8 @@ novel:
   front: http://localhost:5173
   oss:
     endpoint: http://oss-cn-beijing.aliyuncs.com
-    bucket-name:
-    region:
+    bucket-name: java-web-lws
+    region: cn-beijing
   exclude:
     path:
       - /user/login
@@ -30,6 +30,8 @@ novel:
       - /book/random
       - /book/rank
       - /book/content
+      - /book/search
+      - /book/state
       - /captcha
       - /comment/top
       - /comment/child
@@ -44,3 +46,10 @@ springdoc:
   # 默认是false，需要设置为true
   default-flat-param-object: true
 
+sa-token:
+  # jwt秘钥
+  jwt-secret-key: awsl
+
+es:
+  host: 192.168.229.128
+  port: 9200

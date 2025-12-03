@@ -18,10 +18,17 @@
     </properties>
 <dependencies>
     <dependency>
+        <groupId>org.elasticsearch.client</groupId>
+        <artifactId>elasticsearch-rest-high-level-client</artifactId>
+    </dependency>
+    <dependency>
         <groupId>com.auth0</groupId>
         <artifactId>java-jwt</artifactId>
     </dependency>
-
+    <dependency>
+        <groupId>cn.dev33</groupId>
+        <artifactId>sa-token-jwt</artifactId>
+    </dependency>
     <dependency>
         <groupId>com.novel</groupId>
         <artifactId>novel-pojo</artifactId>

@@ -43,10 +43,16 @@
         <jimmer.version>0.9.64</jimmer.version>
         <jackson.version>2.15.2</jackson.version>
         <kaptcha.version>2.3.2</kaptcha.version>
+        <elasticsearch.version>7.12.1</elasticsearch.version>
     </properties>
     <dependencyManagement>
-
         <dependencies>
+<!--            ES搜索引擎 -->
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-high-level-client</artifactId>
+                <version>${elasticsearch.version}</version>
+            </dependency>
 			<!-- mysql -->
 			<dependency>
 				<groupId>mysql</groupId>
@@ -60,6 +66,13 @@
                 <artifactId>java-jwt</artifactId>
                 <version>${jwt}</version>
             </dependency>
+            <!-- Sa-Token 整合 jwt -->
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-jwt</artifactId>
+                <version>1.44.0</version>
+            </dependency>
+
             <!--Hutool工具包-->
             <dependency>
                 <groupId>cn.hutool</groupId>
@@ -171,6 +184,12 @@
             <groupId>eu.bitwalker</groupId>
             <artifactId>UserAgentUtils</artifactId>
             <version>1.21</version>
+        </dependency>
+        <!-- Sa-Token 权限认证框架 -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot3-starter</artifactId>
+            <version>1.44.0</version>
         </dependency>
     </dependencies>
 

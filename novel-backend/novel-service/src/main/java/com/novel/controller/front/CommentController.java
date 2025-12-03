@@ -1,12 +1,12 @@
 package com.novel.controller.front;
 
-import com.novel.dto.comment.BookCommentInput;
-import com.novel.dto.comment.BookCommentView;
-import com.novel.dto.comment.BookSubCommentView;
-import com.novel.po.comment.BookComment;
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.novel.result.PageResult;
 import com.novel.result.Result;
 import com.novel.service.BookCommentService;
+import com.novel.user.dto.comment.BookCommentInput;
+import com.novel.user.dto.comment.BookCommentView;
+import com.novel.user.dto.comment.BookSubCommentView;
 import com.novel.utils.IpUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,6 +48,7 @@ public class CommentController {
 		return Result.ok(list);
 	}
 	
+	@SaCheckLogin
 	@Operation(summary = "发布评论")
 	@PostMapping("/add")
 	public Result<BookCommentView> addBookComment(HttpServletRequest request, @RequestBody BookCommentInput bookComment) {
@@ -57,10 +58,11 @@ public class CommentController {
 		return Result.ok(bookCommentView);
 	}
 	
+	@SaCheckLogin
 	@Operation(summary = "删除评论")
 	@DeleteMapping("{id}")
 	public Result<String> deleteBookComment(@PathVariable Long id) {
-		bookCommentService.deleteBookComment(id);
-		return Result.ok();
+		boolean isDeleted = bookCommentService.deleteBookComment(id);
+		return isDeleted ? Result.ok() : Result.fail("删除失败：当前用户无操作权限");
 	}
 }

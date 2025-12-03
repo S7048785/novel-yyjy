@@ -3,16 +3,13 @@ package com.novel.service.impl;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.novel.constant.CacheConstant;
-import com.novel.dto.news.LaetstNewsView;
 import com.novel.po.news.NewsInfoTable;
-import com.novel.result.Result;
 import com.novel.service.NewService;
+import com.novel.user.dto.news.LaetstNewsView;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 

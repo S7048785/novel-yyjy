@@ -1,14 +1,21 @@
 package com.novel.repository;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
+import com.novel.admin.dto.user.UserInfoView;
+import com.novel.admin.dto.user.UserUpdateInput;
 import com.novel.constant.MessageConstant;
-import com.novel.context.BaseContext;
-import com.novel.dto.user.BookReadHistoryView;
-import com.novel.dto.user.UserBookShelfView;
+import com.novel.dto.req.UserPageQueryReq;
 import com.novel.exception.BaseException;
 import com.novel.po.user.*;
+import com.novel.result.PageResult;
+import com.novel.user.dto.user.BookReadHistoryView;
+import com.novel.user.dto.user.UserBookShelfView;
+import org.babyfish.jimmer.Page;
 import org.babyfish.jimmer.sql.JSqlClient;
+import org.babyfish.jimmer.sql.ast.Expression;
 import org.babyfish.jimmer.sql.ast.Predicate;
+import org.babyfish.jimmer.sql.ast.PropExpression;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -24,7 +31,7 @@ public class UserRepository {
 	
 	private final UserInfoTable userTable = UserInfoTable.$;
 	
-	public UserInfo getUserInfo(String userId) {
+	public UserInfo getUserInfo(long userId) {
 		List<UserInfo> execute = sqlClient.createQuery(userTable)
 				                         .where(userTable.id().eq(Long.valueOf(userId)))
 				                         .select(userTable)
@@ -71,7 +78,7 @@ public class UserRepository {
 	}
 	
 	public void updateAvatar(String url) {
-		Long userId = BaseContext.getCurrentId();
+		Long userId = StpUtil.getLoginIdAsLong();
 		sqlClient.createUpdate(userTable)
 				.set(userTable.userPhoto(), url)
 				.where(userTable.id().eq(userId))
@@ -89,26 +96,26 @@ public class UserRepository {
 	}
 	
 	public List<BookReadHistoryView> listHistory() {
-		Long userId = BaseContext.getCurrentId();
+		Long userId = StpUtil.getLoginIdAsLong();
 		UserReadHistoryTable table = UserReadHistoryTable.$;
 		
 		return sqlClient.createQuery(table)
-				                                 .where(table.userId().eq(userId))
-				                                 .orderBy(table.updateTime().desc())
-				                                 .select(table.fetch(BookReadHistoryView.class))
-				                                 .limit(20)
-				           .execute();
+				       .where(table.userId().eq(userId))
+				       .orderBy(table.updateTime().desc())
+				       .select(table.fetch(BookReadHistoryView.class))
+				       .limit(20)
+				       .execute();
 	}
 	
 	public List<UserBookShelfView> listBookshelf() {
-		Long userId = BaseContext.getCurrentId();
+		Long userId = StpUtil.getLoginIdAsLong();
 		return sqlClient.createQuery(UserBookshelfTable.$)
-				                                  .where(UserBookshelfTable.$.userId().eq(userId))
+				       .where(UserBookshelfTable.$.userId().eq(userId))
 				       .where(UserBookshelfTable.$.state().eq(0))
-				                                  .orderBy(UserBookshelfTable.$.updateTime().desc())
-				                                  .select(UserBookshelfTable.$.fetch(UserBookShelfView.class))
+				       .orderBy(UserBookshelfTable.$.updateTime().desc())
+				       .select(UserBookshelfTable.$.fetch(UserBookShelfView.class))
 				       .limit(20)
-				                                  .execute();
+				       .execute();
 	}
 	
 	public void updateBookshelf(int optType, Long userId, long bookId) {
@@ -125,5 +132,49 @@ public class UserRepository {
 					.setUpdateTime(LocalDateTime.now())
 					.setPreContentId(CollUtil.isEmpty(execute) ? null : execute.get(0));
 		}), SaveMode.UPSERT);
+	}
+	
+	/**
+	 * 获取用户角色
+	 *
+	 * @param l
+	 * @return
+	 */
+	public List<String> getUserRole(long l) {
+		return sqlClient.createQuery(userTable)
+				       .where(userTable.id().eq(l))
+				       .select(userTable.role())
+				       .execute();
+	}
+	
+	public void updateUser(UserUpdateInput user) {
+		sqlClient.update(user);
+	}
+	
+	public void delete(Long id) {
+		sqlClient.deleteById(UserInfo.class, id);
+	}
+	
+	public PageResult<UserInfoView> page(UserPageQueryReq req) {
+		PropExpression order = switch (req.getSortField()) {
+			case 0 -> userTable.id();
+			case 1 -> userTable.email();
+			case 2 -> userTable.createTime();
+			default -> null;
+		};
+		
+		Page<UserInfoView> userInfoViewPage = sqlClient.createQuery(userTable)
+				                                      .where(
+						                                      Predicate.and(
+								                                      userTable.id().eqIf(req.getUserId()),
+								                                      userTable.email().likeIf(req.getEmail()),
+								                                      userTable.status().eqIf(req.getStatus()),
+								                                      userTable.createTime().betweenIf(req.getStartTime(), req.getEndTime())
+						                                      )
+				                                      )
+				                                      .orderBy(order)
+				                                      .select(userTable.fetch(UserInfoView.class))
+				                                      .fetchPage(req.getPageNum() - 1, req.getPageSize());
+		return new PageResult<>(req.getPageNum(), req.getPageSize(), userInfoViewPage.getTotalRowCount(), userInfoViewPage.getRows());
 	}
 }

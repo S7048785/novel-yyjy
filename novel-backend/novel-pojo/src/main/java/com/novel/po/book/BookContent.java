@@ -1,5 +1,6 @@
 package com.novel.po.book;
 
+import com.novel.po.BaseEntity;
 import jakarta.validation.constraints.Null;
 import org.babyfish.jimmer.jackson.JsonConverter;
 import org.babyfish.jimmer.jackson.LongToStringConverter;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
  */
 @Table(name = "book_content")
 @Entity
-public interface BookContent {
+public interface BookContent extends BaseEntity {
 	
 	@Id
 	@JsonConverter(LongToStringConverter.class)
@@ -33,12 +34,6 @@ public interface BookContent {
 	 * 小说章节内容
 	 */
 	String content();
-	
-	@Null
-	LocalDateTime createTime();
-	
-	@Null
-	LocalDateTime updateTime();
 	
 	@Default("0")
 	@LogicalDeleted("1")

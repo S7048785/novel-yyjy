@@ -1,17 +1,20 @@
 package com.novel.repository;
 
-import cn.hutool.core.collection.CollUtil;
-import com.novel.context.BaseContext;
-import com.novel.dto.comment.BookCommentInput;
-import com.novel.dto.comment.BookCommentView;
-import com.novel.dto.comment.BookSubCommentView;
+import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import com.novel.constant.MessageConstant;
+import com.novel.exception.BaseException;
 import com.novel.po.book.BookInfoTable;
 import com.novel.po.comment.BookComment;
 import com.novel.po.comment.BookCommentDraft;
+import com.novel.po.comment.BookCommentProps;
 import com.novel.po.comment.BookCommentTable;
 import com.novel.result.PageResult;
+import com.novel.user.dto.comment.BookCommentInput;
+import com.novel.user.dto.comment.BookCommentView;
+import com.novel.user.dto.comment.BookSubCommentView;
+import org.babyfish.jimmer.sql.DissociateAction;
 import org.babyfish.jimmer.sql.JSqlClient;
-import org.babyfish.jimmer.sql.ast.mutation.DeleteMode;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -32,8 +35,7 @@ public class CommentRepository {
 		var execute = sqlClient.createQuery(bookCommentTb)
 				              .where(bookCommentTb.bookId().eq(bookId))
 				              .where(
-						              bookCommentTb.parentId().eq(0L),
-						              bookCommentTb.rootParentId().eq(0L)
+						              bookCommentTb.rootParentId().isNull()
 				              )
 				              .orderBy(bookCommentTb.createTime().desc())
 				              .select(bookCommentTb.fetch(BookCommentView.class))
@@ -55,7 +57,7 @@ public class CommentRepository {
 	
 	@Transactional
 	public BookCommentView addBookComment(String ip, String address, BookCommentInput bookComment) {
-		Long currentId = BaseContext.getCurrentId();
+		long currentId = StpUtil.getLoginIdAsLong();
 		BookComment modifiedEntity = sqlClient.save(BookCommentDraft.$.produce(draft -> {
 			draft.setBookId(bookComment.getBookId())
 					.setUserId(currentId)
@@ -84,14 +86,48 @@ public class CommentRepository {
 		return new BookCommentView(modifiedEntity);
 	}
 	
+	/**
+	 * 删除评论
+	 * 非根评论不做级联删除
+	 * @param id
+	 */
 	@Transactional
 	public void remove(Long id) {
-		sqlClient.deleteById(BookComment.class, id);
+		// 查找评论
+		List<BookComment> execute = sqlClient.createQuery(bookCommentTb)
+				                            .where(bookCommentTb.id().eq(id))
+				                            .select(bookCommentTb)
+				                            .execute();
+		if (execute.isEmpty()) {
+			throw new BaseException(MessageConstant.COMMENT_NOT_FOUND);
+		}
+		BookComment bookComment = execute.get(0);
+		// 非根评论 直接删除
+		if (bookComment.rootParent().id() != 0) {
+			sqlClient.deleteById(BookComment.class, id);
+		} else {
+			
+			/**
+			 * 级联删除根评论
+			 */
+			sqlClient
+					.getEntities()
+					.deleteCommand(BookComment.class, id)
+					.setDissociateAction(BookCommentProps.ROOT_PARENT, DissociateAction.DELETE)
+					.execute();
+		}
 		
-		// 更新数量
-		sqlClient.createUpdate(BookInfoTable.$)
-				.where(BookInfoTable.$.id().eq(id))
-				.set(BookInfoTable.$.commentCount(), BookInfoTable.$.commentCount().minus(1L))
-				.execute();
+	}
+	
+	public boolean findUserByCommentId(Long id) {
+		// 获取当前用户ID
+		long userId = StpUtil.getLoginIdAsLong();
+		List<Long> execute = sqlClient.createQuery(BookCommentTable.$)
+				                     .where(BookCommentTable.$.id().eq(id))
+				                     .select(bookCommentTb.userId())
+				                     .execute();
+		Long first = CollectionUtil.getFirst(execute);
+		// 评论不存在或评论用户ID和当前用户ID不一致
+		return first == null || first == userId;
 	}
 }

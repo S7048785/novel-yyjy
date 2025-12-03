@@ -1,28 +1,32 @@
 package com.novel.repository;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.novel.context.BaseContext;
-import com.novel.dto.*;
-import com.novel.dto.book.*;
-import com.novel.dto.home.HomeBookView;
+import com.novel.dto.BookChapterDto;
+import com.novel.dto.req.BookChapterAddReq;
+import com.novel.dto.req.ChapterPageQueryReq;
 import com.novel.exception.BaseException;
 import com.novel.po.Fetchers;
+import com.novel.po.Tables;
 import com.novel.po.book.*;
 import com.novel.po.home.HomeBookTable;
-import com.novel.po.user.UserBookshelf;
 import com.novel.po.user.UserBookshelfTable;
 import com.novel.po.user.UserReadHistoryDraft;
-import com.novel.po.user.UserReadHistoryTable;
 import com.novel.result.PageResult;
+import com.novel.user.dto.book.*;
+import com.novel.user.dto.home.HomeBookView;
+import org.babyfish.jimmer.Page;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.babyfish.jimmer.sql.ast.Predicate;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.babyfish.jimmer.sql.ast.query.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.yaml.snakeyaml.util.Tuple;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -58,10 +62,10 @@ public class BookRepository {
 	 *
 	 * @return
 	 */
-	public List<HomeBookRankView> listBookVisitRank(int count) {
+	public List<VisitRankBookView> listBookVisitRank(int count) {
 		return sqlClient.createQuery(BookInfoTable.$)
 				       .select(BookInfoTable.$.fetch(
-						       HomeBookRankView.class
+						       VisitRankBookView.class
 				       ))
 				       .limit(count)
 				       .execute();
@@ -168,7 +172,7 @@ public class BookRepository {
 		
 		var page = sqlClient.createQuery(bookInfo)
 				           .where(bookInfo.workDirection().eqIf(params.getChannelId()))
-				           .where(bookInfo.categoryId().eqIf(StrUtil.isBlank(params.getCategoryId()) ? null : Long.valueOf(params.getCategoryId())))
+				           .where(bookInfo.categoryId().eqIf(params.getCategoryId() != null, Long.valueOf(params.getCategoryId())))
 				           .where(bookInfo.bookStatus().eqIf(params.getOverState()))
 				           .where(bookInfo.wordCount().betweenIf(wordCountMin, wordCountMax))
 				           .where(bookInfo.lastChapterUpdateTime().ltIf(params.getUpdateDay() != null, LocalDateTime.now().minusDays(params.getUpdateDay() == null ? 0 : params.getUpdateDay())))
@@ -243,17 +247,17 @@ public class BookRepository {
 	
 	public Tuple<String, String> getChapter(long bookId, long chapterNum) {
 		List<Long> nextChapterId = sqlClient.createQuery(BookChapterTable.$)
-				                             .where(BookChapterTable.$.bookId().eq(bookId))
-				                             .where(BookChapterTable.$.chapterNum().eq((int) (chapterNum + 1)))
-				                             .select(BookChapterTable.$.id())
-				                             .limit(1)
-				                             .execute();
+				                           .where(BookChapterTable.$.bookId().eq(bookId))
+				                           .where(BookChapterTable.$.chapterNum().eq((int) (chapterNum + 1)))
+				                           .select(BookChapterTable.$.id())
+				                           .limit(1)
+				                           .execute();
 		List<Long> prevChapterId = sqlClient.createQuery(BookChapterTable.$)
-				                             .where(BookChapterTable.$.bookId().eq(bookId))
-				                             .where(BookChapterTable.$.chapterNum().eq((int) (chapterNum - 1)))
-				                             .select(BookChapterTable.$.id())
-				                             .limit(1)
-				                             .execute();
+				                           .where(BookChapterTable.$.bookId().eq(bookId))
+				                           .where(BookChapterTable.$.chapterNum().eq((int) (chapterNum - 1)))
+				                           .select(BookChapterTable.$.id())
+				                           .limit(1)
+				                           .execute();
 		String next = String.valueOf(nextChapterId.isEmpty() ? null : nextChapterId.get(0));
 		String prev = String.valueOf(prevChapterId.isEmpty() ? null : prevChapterId.get(0));
 		
@@ -271,14 +275,14 @@ public class BookRepository {
 		
 	}
 	
-	public boolean updateBookshelf(long bookId, String userId, long chapterId) {
+	public boolean updateBookshelf(long bookId, long userId, long chapterId) {
 		
-		boolean exists = isInBookshelf(Long.valueOf(userId), bookId);
+		boolean exists = isInBookshelf(userId, bookId);
 		
-		if(exists) {
+		if (exists) {
 			sqlClient.createUpdate(UserBookshelfTable.$)
 					.where(UserBookshelfTable.$.bookId().eq(bookId))
-					.where(UserBookshelfTable.$.userId().eq(Long.valueOf(userId)))
+					.where(UserBookshelfTable.$.userId().eq(userId))
 					.set(UserBookshelfTable.$.preContentId(), chapterId)
 					.execute();
 		}
@@ -289,19 +293,82 @@ public class BookRepository {
 	public boolean isInBookshelf(Long userId, long bookId) {
 		// 是否在书架中
 		return sqlClient.createQuery(UserBookshelfTable.$)
-				                 .where(UserBookshelfTable.$.bookId().eq(bookId))
-				                 .where(UserBookshelfTable.$.userId().eq(userId))
-				                 .where(UserBookshelfTable.$.state().eq(0))
-				                 .exists();
+				       .where(UserBookshelfTable.$.bookId().eq(bookId))
+				       .where(UserBookshelfTable.$.userId().eq(userId))
+				       .where(UserBookshelfTable.$.state().eq(0))
+				       .exists();
 	}
 	
 	public List<BookInfoSearchView> search(String name) {
 		return sqlClient.createQuery(BookInfoTable.$)
-				                            .where(Predicate.or(
-						                            BookInfoTable.$.bookName().like(name),
-						                            BookInfoTable.$.authorName().like(name)
-				                            ))
-				                            .select(BookInfoTable.$.fetch(BookInfoSearchView.class))
-				                            .execute();
+				       .where(Predicate.or(
+						       BookInfoTable.$.bookName().like(name),
+						       BookInfoTable.$.authorName().like(name)
+				       ))
+				       .select(BookInfoTable.$.fetch(BookInfoSearchView.class))
+				       .execute();
+	}
+	
+	public PageResult<BookChapterView> pageForAdmin(ChapterPageQueryReq req) {
+		BookChapterTable table = BookChapterTable.$;
+		var page = sqlClient.createQuery(table)
+				                          .where(table.id().eqIf(req.getChapterId()))
+				                          .where(table.chapterName().likeIf(req.getChapterName()))
+				                          .where(table.book().bookName().eqIf((req.getBookName())))
+				                          .where(table.createTime().between(req.getStartTime(), req.getEndTime()))
+				                          .orderBy(table.id().desc())
+				                          .select(table.fetch(BookChapterView.class))
+				                          .fetchPage(req.getPageNum() - 1, req.getPageSize());
+		return new PageResult<>(req.getPageNum(), req.getPageSize(), page.getTotalRowCount(), page.getRows());
+	}
+	
+	@Transactional
+	public void addForAdmin(BookChapterAddReq req) {
+		// 查询章节数
+		List<Long> execute = sqlClient.createQuery(BookChapterTable.$)
+				                     .where(BookChapterTable.$.bookId().eq(req.getBookId()))
+				                     .selectCount()
+				                     .execute();
+		Long first = CollUtil.getFirst(execute);
+		var chapterDraft = BookChapterDraft.$.produce(draft -> {
+			draft.setBookId(req.getBookId())
+					.setChapterName(req.getChapterName())
+					.setChapterNum(first == null ? 1 : (int)(long) first)
+					.setVipState(0)
+					.setWordCount(req.getContent().length());
+		});
+		BookChapter modifiedEntity = sqlClient.save(chapterDraft).getModifiedEntity();
+		var contentDraft = BookContentDraft.$.produce(draft -> {
+			draft.setContent(req.getContent())
+					.setChapterId(modifiedEntity.id())
+					.setContent(req.getContent());
+		});
+		sqlClient.save(contentDraft);
+		
+		// 更新章节数量和最新章节信息
+		sqlClient.createUpdate(bookInfo)
+				.where(bookInfo.id().eq(req.getBookId()))
+				.set(bookInfo.lastChapterId(), BigInteger.valueOf(modifiedEntity.id()))
+				.set(bookInfo.lastChapterName(), req.getChapterName())
+				.set(bookInfo.lastChapterUpdateTime(), modifiedEntity.updateTime())
+				.set(bookInfo.updateTime(), modifiedEntity.updateTime())
+				.set(bookInfo.wordCount(), bookInfo.wordCount().plus((long) modifiedEntity.wordCount()))
+				.execute();
+	}
+	
+	public void updateForAdmin(BookChapterAddReq req) {
+		
+		BookInfo byId = sqlClient.findById(BookInfo.class, req.getBookId());
+		int wordCount = 0;
+		if (byId != null) {
+			wordCount = (int)byId.wordCount() - req.getContent().length();
+		}
+		sqlClient.createUpdate(BookChapterTable.$)
+				.where(BookChapterTable.$.id().eq(req.getBookId()))
+				.set(BookChapterTable.$.chapterName(), req.getChapterName())
+				.set(BookChapterTable.$.updateTime(), LocalDateTime.now())
+				.set(BookChapterTable.$.content().content(), req.getContent())
+				.set(BookChapterTable.$.wordCount(), BookChapterTable.$.wordCount().plus(wordCount))
+				.execute();
 	}
 }

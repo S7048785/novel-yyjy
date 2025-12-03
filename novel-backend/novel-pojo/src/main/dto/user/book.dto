@@ -1,5 +1,5 @@
 export com.novel.po.book.BookInfo
-    -> package com.novel.dto.book
+    -> package com.novel.user.dto.book
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "首页小说排名")
@@ -11,11 +11,34 @@ HomeBookRankView {
     bookName
     @Schema(description = "简介")
     bookDesc
+    @Schema(description = "分类")
+    categoryName
+    @Schema(description = "作者")
+    authorName
+}
+
+@Schema(description = "点击排行")
+VisitRankBookView {
+    id
+    @Schema(description = "封面url")
+    picUrl
+    @Schema(description = "书名")
+    bookName
+    @Schema(description = "简介")
+    bookDesc
+    @Schema(description = "分类")
+    categoryName
+    @Schema(description = "作者")
+    authorName
+    @Schema(description = "点击量")
+    visitCount
 }
 
 @Schema(description = "最近更新")
 LastUpdateBookView {
     id
+    @Schema(description = "分类Id")
+    categoryId
     @Schema(description = "分类")
     categoryName
     @Schema(description = "书名")
@@ -57,13 +80,15 @@ AllBookView {
 }
 
 input AllBookQueryInput {
+    @Schema(description = "书名")
+    bookName: String?
     @Schema(description = "频道id")
     channelId: Int?
     @Schema(description = "分类id")
-    categoryId
+    categoryId: Int?
     @Schema(description = "小说状态 0-连载中 1-完结")
     overState: Int?
-    @Schema(description = "字数 0. 30万以下 1. 30-50万 2. 50-100万 3. 100万以上")
+    @Schema(description = "字数 0. 30万以内 1. 50万以内 2. 30万以上 3. 50万以上")
     wordCountState: Int?
     @Schema(description = "几天前更新")
     updateDay: Int?
@@ -114,6 +139,8 @@ BookRankView {
     authorName
     @Schema(description = "字数")
     wordCount
+    @Schema(description = "封面url")
+    picUrl
 }
 
 BookSimpleInfoView {
