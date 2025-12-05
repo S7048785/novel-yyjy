@@ -38,6 +38,9 @@ importers:
       vue:
         specifier: ^3.5.13
         version: 3.5.17(typescript@5.8.3)
+      vue-icons-plus:
+        specifier: ^0.1.8
+        version: 0.1.8(vue@3.5.17(typescript@5.8.3))
       vue-router:
         specifier: ^4.5.0
         version: 4.5.1(vue@3.5.17(typescript@5.8.3))
@@ -1663,6 +1666,11 @@ packages:
     resolution: {integrity: sha512-JdgRRUVrN0Y2GosA0M68DEbKlXMqJ7FQgsK8CjQD2vxvNSqAU6PZEpi4cfcTVtfM2GVOMjHo7GKKLbXxOBqDqA==}
     peerDependencies:
       vue: ^3.4.37
+
+  vue-icons-plus@0.1.8:
+    resolution: {integrity: sha512-Xc4hDsD/oP9waSUf44nSaFBhUPo+QkpKclx0S7//5BRACpXymctbit02epek0VRW6nb81pR486XmxPP/ofm2yQ==}
+    peerDependencies:
+      vue: '>=2.7.0'
 
   vue-router@4.5.1:
     resolution: {integrity: sha512-ogAF3P97NPm8fJsE4by9dwSYtDwXIY1nFY9T6DyQnGHd1E2Da94w9JIolpe42LJGIl0DwOHBi8TcRPlPGwbTtw==}
@@ -3322,6 +3330,10 @@ snapshots:
   vscode-uri@3.1.0: {}
 
   vue-flow-layout@0.1.1(vue@3.5.17(typescript@5.8.3)):
+    dependencies:
+      vue: 3.5.17(typescript@5.8.3)
+
+  vue-icons-plus@0.1.8(vue@3.5.17(typescript@5.8.3)):
     dependencies:
       vue: 3.5.17(typescript@5.8.3)
 

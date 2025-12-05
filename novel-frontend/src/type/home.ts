@@ -8,6 +8,21 @@ export type HomeBookView = {
 	bookName: string;
 	authorName: string;
 	bookDesc: string;
+	intro?: string;
+	tag?: string;
+	visitCount?: number;
+	categoryName?: string;
+}
+
+export type VisitRankBookView = {
+	id: string;
+	picUrl: string;
+	bookName: string;
+	authorName: string;
+	bookDesc: string;
+	tag: string;
+	visitCount: number;
+	categoryName: string;
 }
 
 /**
@@ -20,6 +35,7 @@ export type HomeBookRankView = Pick<HomeBookView,'picUrl' | 'bookName' | 'bookDe
  */
 export type HomeLatestUpdateBookView = {
 	id: string;
+	categoryId: string;
 	categoryName: string;
 	bookName: string;
 	lastChapterName: string;

@@ -2,13 +2,16 @@
 import dayjs from "dayjs";
 import type { BookSubCommentView} from "@/type/book.ts";
 
-const {subComment, rootParentId} = defineProps<{
+const {subComment, rootParentId, userId, index} = defineProps<{
 	subComment: BookSubCommentView[] | null,
-	rootParentId: string
+	rootParentId: string,
+	userId: string,
+	index: number
 }>()
 
 const emit = defineEmits<{
-	replyClick: [id: string, replayNickName2: string, parentId: string],
+	replyClick: [id: string, replayNickName2: string, parentId: string]
+	deleteSubComment: [id: string, index: number, rootParentId: string]
 }>()
 
 </script>
@@ -29,6 +32,15 @@ const emit = defineEmits<{
 				<div class="text-13px text-neutral-500">
 					<span class="mr-4">{{dayjs(item.createTime).format("YYYY-MM-DD HH:mm")}}</span>
 					<a-button @click="() => emit('replyClick', rootParentId, item.nickName, item.id )" type="link" class="text-neutral p-0">回复</a-button>
+					<a-popconfirm
+							title="是否删除当前评论？"
+							ok-text="确定"
+							cancel-text="No"
+							:showCancel="false"
+							@confirm="emit('deleteSubComment', item.id, index, rootParentId)"
+					>
+						<a-button v-if="item.userId === userId" type="link" class="text-red-500 hover:text-red! pl-2">删除</a-button>
+					</a-popconfirm>
 				</div>
 			</div>
 		</div>

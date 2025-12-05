@@ -8,7 +8,7 @@ const getUserInfo = async () => {
 	const res = await getUserInfoAPI()
 	if (res.code === 0) {
 		userStore.logout();
-		router.push('/search')
+		// router.push('/home')
 		return;
 	}
 	userStore.setUserInfo(res.data)

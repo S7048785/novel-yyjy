@@ -1,7 +1,9 @@
 <script setup lang="ts">
 
-// 评论内容
-import {addBookCommentAPI, getBookCommentAPI, getBookSubCommentAPI} from "@/api/comment.ts";
+/**
+ * 评论区
+ */
+import {addBookCommentAPI, deleteBookCommentAPI, getBookCommentAPI, getBookSubCommentAPI} from "@/api/comment.ts";
 import type {BookCommentView} from "@/type/book.ts";
 import dayjs from "dayjs";
 import SubComment from "@/view/book/[id]/components/sub-comment.vue";
@@ -9,7 +11,7 @@ import subComment from "@/view/book/[id]/components/sub-comment.vue";
 import {message} from "ant-design-vue";
 import {useUserStore} from "@/stores/userStore.ts";
 import emitter from "@/utils/emitter.ts";
-
+import type {PageData} from "@/utils/request.ts";
 
 const userStore = useUserStore()
 const {bookId} = defineProps<{ bookId: string }>()
@@ -19,8 +21,32 @@ const bookCommentValue = ref<string>('')
 const bookComment: BookCommentView[] = reactive([])
 const commentCount = ref(0)
 
-const sendComment = async (rootParentId?: string, parentId?: string) => {
+// 删除评论 by评论ID
+const deleteComment = async (id: string) => {
+	const res = await deleteBookCommentAPI(id);
 
+	res.code === 1 ? message.success('删除成功') : message.error(res.msg);
+	// 刷新评论区
+	const res1 = await getBookCommentAPI(bookId, pageNo, pageSize)
+	bookComment.splice(0, bookComment.length,...res1.data.list)
+	commentCount.value = res1.data.total
+	hasMore.value = false;
+}
+
+/**
+ * 删除子评论
+ * @param id 评论id
+ * @param index 根评论索引
+ * @param rootParentId 根评论ID
+ */
+const deleteSubComment = async (id: string, index: number, rootParentId: string) => {
+	const res = await deleteBookCommentAPI(id);
+	res.code === 1 ? message.success('删除成功') : message.error(res.msg);
+	getSubComment(index,rootParentId);
+	bookComment[index].childrenCount--;
+}
+
+const sendComment = async (rootParentId?: string, parentId?: string) => {
 	if (userStore.user == null) {
 		message.warn('请先登录')
 		emitter.emit('open-login')
@@ -51,6 +77,7 @@ const sendComment = async (rootParentId?: string, parentId?: string) => {
 	commentCount.value++;
 	bookCommentValue.value = '';
 }
+
 const sendSubComment = async (index: number) => {
 	if (userStore.user == null) {
 		message.warn('请先登录')
@@ -73,6 +100,7 @@ const sendSubComment = async (index: number) => {
 	reply.value = '';
 	reply.isShowReplyId = '';
 }
+
 let pageNo = 1;
 let pageSize = 20;
 const hasMore = ref(true);
@@ -186,7 +214,16 @@ onUnmounted(() => {
 							<a-button @click="() => replyClick(item.id,item.nickName, item.id)" type="link" class="text-neutral p-0">
 								回复
 							</a-button>
-							<div v-if="item.childrenCount > 0 && item.children?.length < item.childrenCount" class="text-sm">
+							<a-popconfirm
+									title="是否删除当前评论？"
+									ok-text="确定"
+									cancel-text="No"
+									:showCancel="false"
+									@confirm="deleteComment(item.id)"
+							>
+								<a-button v-if="item.userId === userStore.user?.id" type="link" class="text-red-500 hover:text-red! pl-2">删除</a-button>
+							</a-popconfirm>
+							<div v-if="item.childrenCount > 0 && item.children!.length < item.childrenCount" class="text-sm">
 								共 {{ item.childrenCount }} 条回复
 								<a-button @click="getSubComment(index, item.id)" type="link" class="p-0 m-0 h-auto text-neutral-500">
 									点击查看
@@ -195,7 +232,14 @@ onUnmounted(() => {
 						</div>
 						<!--						子评论-->
 						<div>
-							<sub-comment @replyClick="replyClick" :root-parent-id="item.id" :sub-comment="item.children"/>
+							<sub-comment
+									@replyClick="replyClick"
+									:root-parent-id="item.id"
+									:sub-comment="item.children"
+									:userId="userStore.user?.id || ''"
+									:index="index"
+									@deleteSubComment="deleteSubComment"
+							/>
 						</div>
 						<div v-if="reply.isShowReplyId === item.id" class="">
 							<div class="flex mt-2">

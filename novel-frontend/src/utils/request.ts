@@ -32,7 +32,7 @@ export const request = axios.create({
 request.defaults.withCredentials = true;
 
 request.interceptors.request.use(config => {
-	config.headers['Authorization'] = localStorage.getItem('token') || '';
+	// config.headers['Authorization'] = localStorage.getItem('token') || '';
 	return config;
 }, error => {
 

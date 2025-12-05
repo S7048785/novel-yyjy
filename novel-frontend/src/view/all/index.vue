@@ -59,7 +59,7 @@ const stateChange = {
 		pageChange(1)
 	}
 }
-// 小说数据
+// 小说分页数据
 const bookData = ref<PageData<AllBookView>>({
 	pageNum: 1,
 	pageSize: 10,

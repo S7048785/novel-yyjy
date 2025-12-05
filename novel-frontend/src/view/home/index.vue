@@ -7,6 +7,9 @@ import {
 	getHomeBookUpdateAPI,
 	getHomeBookVisitRankAPI
 } from "@/api/home.ts";
+import Week from "./components/Week.vue"
+import Hot from "./components/Hot.vue"
+import VisitRank from "./components/VisitRank.vue"
 import {createReusableTemplate} from '@vueuse/core'
 import {getLatestNewsAPI} from "@/api/news.ts";
 import type {LatestNews} from "@/type/news.ts";
@@ -157,156 +160,25 @@ onMounted(async () => {
 	</div>
 
 	<div v-else>
-		<!--	container-1-->
-		<div class="p-5 mb-5 rounded-lg bg-white mx-auto">
-
-			<!--		container-1-left-->
-			<div class="w-178 flex float-left">
-				<!--			container-1-left-img-->
-				<div class="w-80 flex">
-					<RouterLink
-							v-for="(item, index) in homeBookData.sliderContent" :key="item.bookId"
-							:to="`/info/${item.bookId}`"
-							v-show="index === sliderContentIndex" class="mr-4 w-60 h-80"
-							@mouseenter="() => {hoverSliderContentIn(index)}"
-							@mouseleave="hoverSliderContentOut"
-					>
-						<img
-								class="size-full"
-								 :src="item.picUrl" onerror="this.src='/image/default.png'" alt="">
-					</RouterLink>
-					<ul class="flex-col">
-						<li
-								@mouseenter="() => {hoverSliderContentIn(index)}"
-								@mouseleave="hoverSliderContentOut"
-								:class="{'border-blue': sliderContentIndex === index}"
-								class="w-14 box-border mb-2 border-2 border-solid hover:border-blue"
-								v-for="(item, index) in homeBookData.sliderContent"
-								:key="item.bookId">
-							<router-link :to="`/info/${item.bookId}`">
-								<img class="box-border" :src="item.picUrl" alt="">
-							</router-link>
-						</li>
-					</ul>
+		<div>
+			<div class="grid grid-cols-3 my-4">
+				<!--				轮播图-->
+				<div class="col-span-2">
+					<Carousel :data="homeBookData.sliderContent"
+										:pictures="['/image/carousel1.png', '/image/carousel2.png','/image/carousel3.png']"></Carousel>
 				</div>
-
-				<!--			container-1-left-text-->
-				<div class="flex-col flex justify-center" v-if="homeBookData.topBooks.length">
-					<DefineTemplate v-slot="{ books }">
-						<dl class="border-b-1 border-solid pb-2 mb-2 flex flex-col">
-							<dt class="text-center text-blue font-bold mb-2">
-								<RouterLink :to="`/info/${books[0].bookId}`">{{ books[0].bookName }}</RouterLink>
-							</dt>
-							<dd class="mb-2 text-center">
-								<RouterLink :to="`/info/${books[1].bookId}`" v-if="books[1]" class="w-1/2 inline-block hover:text-blue">
-									{{ books[1].bookName }}
-								</RouterLink>
-								<RouterLink :to="`/info/${books[2].bookId}`" v-if="books[2]" class="w-1/2 inline-block hover:text-blue">
-									{{ books[2].bookName }}
-								</RouterLink>
-							</dd>
-							<dd class="text-center">
-								<RouterLink :to="`/info/${books[3].bookId}`" v-if="books[3]" class="w-1/2 inline-block hover:text-blue">
-									{{ books[3].bookName }}
-								</RouterLink>
-								<RouterLink :to="`/info/${books[4].bookId}`" v-if="books[4]" class="w-1/2 inline-block hover:text-blue">
-									{{ books[4].bookName }}
-								</RouterLink>
-							</dd>
-						</dl>
-					</DefineTemplate>
-
-					<ReuseTemplate :books="homeBookData.topBooks.slice(0, 5)"/>
-					<ReuseTemplate :books="homeBookData.topBooks.slice(5)"/>
-
-					<!--				新闻资讯-->
-					<div class="text-sm py-2 " v-if="homeBookData.latestNews.length">
-						<p v-for="item in homeBookData.latestNews.slice(0, 2)" :key="item.id" class="py-2 text-hidden text-center">
-							<span class="text-gray">[{{ item.categoryName }}] </span>
-							<RouterLink class="hover:text-blue" to="/">{{ item.title }}</RouterLink>
-						</p>
-					</div>
-				</div>
+				<!--				本周推荐-->
+				<Week :data="homeBookData.weekCommend"></Week>
 			</div>
 
-			<!--		container-1-right-->
-			<div class="w-60 float-right">
-				<p class="text-xl font-bold pb-2 border-b">本周强推</p>
-				<ul>
-					<li v-for="(item, index) in homeBookData.weekCommend.slice(0, 5)"
-							@mouseenter="() => {weekCommendHoverIndex = index}" :key="item.bookId" class="my-3">
-						<!--					标题-->
-						<RouterLink :to="`/info/${item.bookId}`"
-												class="text-hidden text-sm clear-both inline-flex items-center w-full hover:text-blue">
-							<div class="size-4 text-white not-italic text-center bg-blue-400 mr-2"><span
-									class="relative bottom-0.5">{{ index + 1 }}</span></div>
-							<span class="">{{ item.bookName }}</span>
-						</RouterLink>
-						<!--					图片及描述-->
-						<RouterLink :to="`/info/${item.bookId}`" v-show="index === weekCommendHoverIndex"
-												class="w-full block cursor-default bg-[#f2f2f2] border-1 h-25 p-2 mt-1">
-							<div class="block float-left mr-4">
-								<img class="h-20 cursor-pointer" :src="item.picUrl" alt=""/>
-							</div>
-							<a v-html="homeBookData.weekCommend[weekCommendHoverIndex]?.bookDesc"
-								 class="h-full cursor-pointer hover:text-blue block text-xs line-height-[180%] text-ellipsis overflow-hidden text-gray-500"/>
-						</RouterLink>
-					</li>
-				</ul>
+			<div class="flex gap-4">
+<!--				热门推荐-->
+				<Hot :data="homeBookData.hotRecommend" class="flex-1"></Hot>
+<!--				点击榜-->
+				<VisitRank :data="homeBookData.visitRank" class=""></VisitRank>
 			</div>
-			<div class="clear-both"></div>
 		</div>
 
-		<!--	热门推荐及点击榜单-->
-		<div class="p-5 mb-5 rounded-lg bg-white mx-auto">
-			<!--			left-->
-			<div class="w-178 float-left">
-				<p class="border-b pb-2 text-xl font-bold">热门推荐</p>
-				<div v-for="(item) in homeBookData.hotRecommend" class="float-left my-4 mr-4 w-85 inline-flex h-33">
-					<RouterLink class="w-25 h-32 mr-4 overflow-hidden" :to="`/info/${item.bookId}`">
-						<img class="object-cover size-full transition duration-300 hover:scale-110" :src="item.picUrl"
-								 onerror="this.src='/image/default.png'" alt="">
-					</RouterLink>
-					<div class="h-29 flex-1 line-height-[180%] overflow-hidden">
-						<RouterLink :to="`/info/${item.bookId}`" class="mb-2 hover:text-blue">{{ item.bookName }}</RouterLink>
-						<div class="text-gray-400">
-							<p class="text-xs mb-2">{{ item.authorName }}</p>
-							<p v-html="item.bookDesc" class="text-xs"></p>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!--		right-->
-			<div class="w-60 float-right">
-				<p class="text-xl font-bold pb-2 border-b">点击榜单</p>
-				<ul>
-					<li v-for="(item, index) in homeBookData.visitRank.slice(0, 10)"
-							@mouseenter="() => {visitRankHoverIndex = index}" :key="item.id" class="my-3">
-						<!--					标题-->
-						<RouterLink :to="`/info/${item.id}`"
-												class="text-hidden text-sm clear-both inline-flex items-center w-full hover:text-blue">
-							<div class="size-4 text-white not-italic text-center bg-blue-400 mr-2"><span
-									class="relative bottom-0.5">{{ index + 1 }}</span></div>
-							<span class="">{{ item.bookName }}</span>
-						</RouterLink>
-						<!--					图片及描述-->
-						<RouterLink :to="`/info/${item.id}`" v-show="index === visitRankHoverIndex"
-												class="w-full block cursor-default bg-[#f2f2f2] border-1 h-25 p-2 mt-1">
-							<div class="block float-left mr-4">
-								<img class="h-20 cursor-pointer" :src="item.picUrl" onerror="this.src='/image/default.png'" alt=""/>
-							</div>
-							<a v-html="homeBookData.visitRank[visitRankHoverIndex]?.bookDesc"
-								 class="h-full cursor-pointer hover:text-blue block text-xs line-height-[180%] text-ellipsis overflow-hidden text-gray-500"/>
-						</RouterLink>
-					</li>
-				</ul>
-				<a-button class="w-full bg-[#f2f2f2]">
-					<!--				TODO: 查看更多-->
-					<span style="font-size: 12px">查看更多</span>
-				</a-button>
-			</div>
-			<div class="clear-both"></div>
-		</div>
 
 		<!--	精品推荐 新书榜单-->
 		<div class="p-5 mb-5 rounded-lg bg-white mx-auto">
@@ -368,9 +240,9 @@ onMounted(async () => {
 						:data-source="homeBookData.latestUpdate"
 						size="small">
 					<a-table-column key="categoryName" title="分类" :width="80" data-index="categoryName">
-						<template #default="{ text: categoryName}">
+						<template #default="{ text: categoryName, record: {categoryId}}">
 							<!--									TODO: 路由跳转：分类参数-->
-							<RouterLink class="text-gray-400" :to="`/info/1`">
+							<RouterLink class="text-gray-400" :to="`/category?c=${categoryId}`">
 								{{ categoryName }}
 							</RouterLink>
 						</template>
@@ -411,7 +283,7 @@ onMounted(async () => {
 				<p class="text-xl font-bold pb-2 border-b">最新入库</p>
 				<ul class="mt-3">
 					<li v-for="(item) in homeBookData.latestInsert.slice(0, 20)" class="text-12px border-b py-2">
-						<span class="mr-6">[{{item.categoryName}}]</span>
+						<span class="mr-6">[{{ item.categoryName }}]</span>
 						<RouterLink :to="`/info/${item.id}`" class="text-hidden clear-both items-center w-full text-[#5865A6FF]">
 							<span>{{ item.bookName }}</span>
 						</RouterLink>
