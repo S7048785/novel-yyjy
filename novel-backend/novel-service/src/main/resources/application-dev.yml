@@ -8,14 +8,14 @@ novel:
     password: 5211314
   jwt:
     # jwt签名加密时使用的密钥
-    secret-key: awsl
+    secret-key:
     # jwt过期时间 2小时 (=2 * 60 * 60 * 1000)
     ttl: 7200000
   front: http://localhost:5173
   oss:
     endpoint: http://oss-cn-beijing.aliyuncs.com
-    bucket-name: java-web-lws
-    region: cn-beijing
+    bucket-name:
+    region: 
   exclude:
     path:
       - /user/login

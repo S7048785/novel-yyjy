@@ -10,11 +10,15 @@ spring:
     url: jdbc:mysql://${novel.datasource.host}:${novel.datasource.port}/${novel.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
     username: ${novel.datasource.username}
     password: ${novel.datasource.password}
+
   data:
     redis:
       host: localhost
       port: 6379
       database: 0
+  elasticsearch:
+    # 是否开启 elasticsearch 搜索引擎功能：true-开启 false-不开启
+    enable: false
   servlet:
     multipart:
       max-file-size: 1MB # 最大单个文件大小

@@ -23,6 +23,7 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -32,10 +33,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@ConditionalOnProperty(prefix = "spring.elasticsearch", name = "enable", havingValue = "true")
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SearchServiceImpl implements SearchService {
+public class ESServiceImpl implements SearchService {
 	
 	/* ---------- 常量 ---------- */
 	private static final String INDEX_NAME = "book";
