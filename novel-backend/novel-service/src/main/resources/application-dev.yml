@@ -4,8 +4,8 @@ novel:
     host: localhost
     port: 3306
     database: novel
-    username: root
-    password: 5211314
+    username:
+    password:
   jwt:
     # jwt签名加密时使用的密钥
     secret-key:
@@ -15,7 +15,7 @@ novel:
   oss:
     endpoint: http://oss-cn-beijing.aliyuncs.com
     bucket-name:
-    region: 
+    region:
   exclude:
     path:
       - /user/login
@@ -51,5 +51,5 @@ sa-token:
   jwt-secret-key: awsl
 
 es:
-  host: 192.168.229.128
+  host:
   port: 9200
