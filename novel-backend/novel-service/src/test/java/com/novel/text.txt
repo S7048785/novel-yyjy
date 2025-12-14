@@ -1,0 +1,43 @@
+create table book_chapter
+(
+    id           int auto_increment
+        primary key,
+    book_id      bigint unsigned              not null comment '小说ID',
+    chapter_num  smallint unsigned            not null comment '章节号',
+    chapter_name varchar(100)                 not null comment '章节名',
+    word_count   int unsigned                 not null comment '章节字数',
+    is_vip       tinyint unsigned default '0' not null comment '是否收费;1-收费 0-免费',
+    create_time  datetime                     null,
+    update_time  datetime                     null,
+    del_flag     tinyint          default 0   not null,
+    constraint uk_bookId_chapterNum
+        unique (book_id, chapter_num)
+) comment '小说章节';
+
+create table chapter_summary
+(
+    id          bigint auto_increment
+        primary key,
+    book_id     bigint                   not null,
+    chapter_id  bigint                   not null,
+    segment_num tinyint                  not null comment '段落号',
+    comment_num int unsigned default '0' not null comment '评论量',
+    constraint chapter_summary_pk
+        unique (book_id, chapter_id, segment_num)
+) comment '章节段落概要表';
+
+create table segment_comment
+(
+    id          bigint unsigned auto_increment
+        primary key,
+    user_id     bigint unsigned                        not null comment '用户id',
+    chapter_id  bigint unsigned                        not null comment '章节id',
+    segment_num tinyint                                not null comment '段落号',
+    level       int unsigned default '1'               not null comment '楼层',
+    content     varchar(128)                           not null comment '评论内容',
+    like_count  int unsigned default '0'               not null,
+    ip          char(15)                               not null,
+    ip_address  char(10)                               not null comment 'ip属地',
+    create_time datetime     default CURRENT_TIMESTAMP not null,
+    del_flag    tinyint      default 0                 not null
+) comment '章节段落评论';
