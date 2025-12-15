@@ -41,3 +41,20 @@ sa-token:
   is-share: true
   # token 风格（默认可取值：uuid、simple-uuid、random-32、random-64、random-128、tik）
   token-style: uuid
+
+jimmer:
+  dialect: org.babyfish.jimmer.sql.dialect.MySqlDialect
+  show-sql: false
+  pretty-sql: false
+  database-validation-mode: ERROR
+  openapi:
+    path: /openapi.yml       # OpenAPI规范文件地址
+    ui-path: /openapi.html   # 可视化文档页面地址
+
+  client:
+    ts:
+      path: /ts.zip
+
+springdoc:
+  # 默认是false，需要设置为true
+  default-flat-param-object: true

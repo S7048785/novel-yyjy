@@ -7,9 +7,11 @@ import java.util.List;
 
 /**
  * @author Nyxcirea
+ * @date 2025/12/15
+ * @description: 前端IP配置
  */
 @Data
-@ConfigurationProperties(prefix = "novel.exclude")
-public class ExcludePathProperties {
-	private List<String> path;
+@ConfigurationProperties(prefix = "novel.front")
+public class FrontIpProperties {
+	private List<String> ip;
 }

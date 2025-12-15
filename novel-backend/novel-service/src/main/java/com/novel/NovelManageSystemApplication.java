@@ -1,13 +1,14 @@
 package com.novel;
 
 import com.novel.properties.ExcludePathProperties;
-import org.babyfish.jimmer.sql.EnableDtoGeneration;
+import com.novel.properties.FrontIpProperties;
+import org.babyfish.jimmer.client.EnableImplicitApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.annotation.EnableCaching;
 
-@EnableConfigurationProperties({ExcludePathProperties.class})
+@EnableImplicitApi
+@EnableConfigurationProperties({ExcludePathProperties.class, FrontIpProperties.class})
 @SpringBootApplication
 public class NovelManageSystemApplication {
 

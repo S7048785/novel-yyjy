@@ -61,7 +61,7 @@ public class CommentController {
 	@SaCheckLogin
 	@Operation(summary = "删除评论")
 	@DeleteMapping("{id}")
-	public Result<String> deleteBookComment(@PathVariable Long id) {
+	public Result<String> deleteBookComment(@PathVariable long id) {
 		boolean isDeleted = bookCommentService.deleteBookComment(id);
 		return isDeleted ? Result.ok() : Result.fail("删除失败：当前用户无操作权限");
 	}
