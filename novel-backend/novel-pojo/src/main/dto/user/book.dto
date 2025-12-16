@@ -135,12 +135,18 @@ BookRankView {
     bookName
     @Schema(description = "最新章节")
     lastChapterName
+    @Schema(description = "最新章节id")
+    lastChapterId
     @Schema(description = "作者")
     authorName
     @Schema(description = "字数")
     wordCount
     @Schema(description = "封面url")
     picUrl
+    @Schema(description = "更新时间")
+    lastChapterUpdateTime
+    @Schema(description = "简介")
+    bookDesc
 }
 
 BookSimpleInfoView {

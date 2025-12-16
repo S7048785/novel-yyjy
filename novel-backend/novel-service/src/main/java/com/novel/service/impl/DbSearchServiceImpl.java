@@ -1,10 +1,10 @@
 package com.novel.service.impl;
 
-import com.novel.dto.BookInfoDoc;
 import com.novel.repository.BookRepository;
 import com.novel.result.PageResult;
 import com.novel.service.SearchService;
 import com.novel.user.dto.book.AllBookQueryInput;
+import com.novel.user.dto.book.AllBookView;
 import com.novel.user.dto.book.BookInfoSearchView;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +23,8 @@ public class DbSearchServiceImpl implements SearchService {
     private BookRepository bookRepository;
     
     @Override
-    public PageResult<BookInfoDoc> conditionSearchBooks(AllBookQueryInput condition, int pageNum, int pageSize) {
-        return null;
+    public PageResult<AllBookView> conditionSearchBooks(AllBookQueryInput condition, int pageNum, int pageSize) {
+        return bookRepository.listAll(condition, pageNum, pageSize);
     }
     
     @Override

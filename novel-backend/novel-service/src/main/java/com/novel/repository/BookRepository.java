@@ -225,7 +225,7 @@ public class BookRepository {
 		List<BookRankView> execute = sqlClient.createQuery(bookInfo)
 				                             .orderBy(order)
 				                             .select(bookInfo.fetch(BookRankView.class))
-				                             .limit(30)
+				                             .limit(20)
 				                             .execute();
 		return execute;
 	}

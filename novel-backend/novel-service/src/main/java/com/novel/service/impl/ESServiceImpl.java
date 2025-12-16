@@ -8,6 +8,7 @@ import com.novel.exception.BaseException;
 import com.novel.result.PageResult;
 import com.novel.service.SearchService;
 import com.novel.user.dto.book.AllBookQueryInput;
+import com.novel.user.dto.book.AllBookView;
 import com.novel.user.dto.book.BookInfoSearchView;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,7 @@ public class ESServiceImpl implements SearchService {
 	
 	private final RestHighLevelClient client;
 	@Override
-	public PageResult<BookInfoDoc> conditionSearchBooks(AllBookQueryInput condition,
+	public PageResult<AllBookView> conditionSearchBooks(AllBookQueryInput condition,
 	                                                    int pageNum,
 	                                                    int pageSize) {
 		try {
