@@ -1,15 +1,17 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useUserStore } from "../lib/userStore";
 
-export const Route = createFileRoute('/')({
-  beforeLoad: () => {
-    const token = localStorage.getItem('token')
-    if (!token) {
+export const Route = createFileRoute("/")({
+  beforeLoad: async () => {
+    const isAuthenticated = useUserStore.getState().isAuthenticated;
+    if (!isAuthenticated) {
       throw redirect({
-        to: '/login',
-      })
+        to: "/login",
+      });
     }
+
     throw redirect({
-      to: '/app/dashboard',
-    })
+      to: "/app/dashboard",
+    });
   },
-})
+});

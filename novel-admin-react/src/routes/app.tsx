@@ -1,5 +1,5 @@
-import {createFileRoute, Link, Outlet} from '@tanstack/react-router'
-import {Button, Layout, Menu} from 'antd'
+import {createFileRoute, Link, Outlet, useNavigate} from '@tanstack/react-router'
+import {Button, Layout, Menu, Avatar, Dropdown, Space} from 'antd'
 import {
 	DashboardOutlined,
 	BookOutlined,
@@ -7,12 +7,14 @@ import {
 	UserOutlined,
 	CloudDownloadOutlined,MenuFoldOutlined,
 	MenuUnfoldOutlined,
+	LogoutOutlined,
 
 } from '@ant-design/icons'
 import type {MenuProps} from 'antd'
 import {ProgressBar} from "../components/ProgressBar.tsx";
 import {ThemeToggle} from "../components/ThemeToggle.tsx";
 import {useState} from "react";
+import {useUserStore} from "../lib/userStore";
 
 const {Header, Sider, Content} = Layout
 
@@ -47,7 +49,26 @@ const menuItems: MenuProps['items'] = [
 
 // 布局组件
 export function AppLayout() {
+	const navigate = useNavigate()
 	const [collapsed, setCollapsed] = useState(false);
+	const { userInfo, logout } = useUserStore()
+
+	// 退出登录
+	const handleLogout = () => {
+		logout()
+		navigate({ to: '/login' })
+	}
+
+	// 用户下拉菜单
+	const userMenuItems = [
+		{
+			key: 'logout',
+			icon: <LogoutOutlined />,
+			label: '退出登录',
+			onClick: handleLogout,
+		},
+	]
+
 	return (
 			<Layout style={{minHeight: '100vh'}} >
 				<ProgressBar />
@@ -95,9 +116,20 @@ export function AppLayout() {
 									}}
 							/>
 						</div>
-						<div className="mr-10">
+						<div className="mr-10 flex items-center gap-4">
 							<ThemeToggle />
-							<span style={{color: '#666'}}>管理员</span>
+							<Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+								<Space style={{ cursor: 'pointer' }}>
+									<Avatar
+										src={userInfo?.userPhoto}
+										icon={!userInfo?.userPhoto && <UserOutlined />}
+										style={{ backgroundColor: '#1677ff' }}
+									/>
+									<span style={{ color: '#666' }}>
+										{userInfo?.nickName || userInfo?.email || '管理员'}
+									</span>
+								</Space>
+							</Dropdown>
 						</div>
 					</Header>
 					<Content
