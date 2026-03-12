@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author YYJY
@@ -90,7 +91,7 @@ public class UserController {
 			throw new BaseException("请上传正确格式的图片");
 		}
 		
-		String url = aliyunOSSUtils.upload(file.getBytes(), file.getOriginalFilename());
+		String url = aliyunOSSUtils.upload(file.getBytes(), Objects.requireNonNull(file.getOriginalFilename()));
 
 		userService.updateAvatar(url);
 		

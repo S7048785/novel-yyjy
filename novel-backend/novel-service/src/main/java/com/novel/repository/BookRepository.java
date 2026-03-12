@@ -42,8 +42,6 @@ public class BookRepository {
 	
 	/**
 	 * 查询首页小说推荐
-	 *
-	 * @return
 	 */
 	public List<HomeBookView> listHomeBooks() {
 		return sqlClient.createQuery(HomeBookTable.$)
@@ -324,19 +322,15 @@ public class BookRepository {
 				                     .selectCount()
 				                     .execute();
 		Long first = CollUtil.getFirst(execute);
-		var chapterDraft = BookChapterDraft.$.produce(draft -> {
-			draft.setBookId(req.getBookId())
-					.setChapterName(req.getChapterName())
-					.setChapterNum(first == null ? 1 : (int)(long) first)
-					.setVipState(0)
-					.setWordCount(req.getContent().length());
-		});
+		var chapterDraft = BookChapterDraft.$.produce(draft -> draft.setBookId(req.getBookId())
+				.setChapterName(req.getChapterName())
+				.setChapterNum(first == null ? 1 : (int)(long) first)
+				.setVipState(0)
+				.setWordCount(req.getContent().length()));
 		BookChapter modifiedEntity = sqlClient.save(chapterDraft).getModifiedEntity();
-		var contentDraft = BookContentDraft.$.produce(draft -> {
-			draft.setContent(req.getContent())
-					.setChapterId(modifiedEntity.id())
-					.setContent(req.getContent());
-		});
+		var contentDraft = BookContentDraft.$.produce(draft -> draft.setContent(req.getContent())
+				.setChapterId(modifiedEntity.id())
+				.setContent(req.getContent()));
 		sqlClient.save(contentDraft);
 		
 		// 更新章节数量和最新章节信息

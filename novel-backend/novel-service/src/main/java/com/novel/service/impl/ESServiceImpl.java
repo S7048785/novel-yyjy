@@ -160,7 +160,10 @@ public class ESServiceImpl implements SearchService {
 	
 	private PageResult<BookInfoDoc> parseResponse(SearchResponse resp, int pageNum, int pageSize) {
 		SearchHits hits = resp.getHits();
-		long total = hits.getTotalHits().value;
+		long total = 0;
+		if (hits.getTotalHits() != null) {
+			total = hits.getTotalHits().value;
+		}
 		List<BookInfoDoc> list = new ArrayList<>();
 		for (SearchHit hit : hits.getHits()) {
 			BookInfoDoc view = JSONUtil.toBean(hit.getSourceAsString(), BookInfoDoc.class);

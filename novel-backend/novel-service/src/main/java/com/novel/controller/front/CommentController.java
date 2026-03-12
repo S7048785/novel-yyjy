@@ -28,8 +28,8 @@ public class CommentController {
 	
 	/**
 	 * 小说评论查询接口 顶层评论
-	 * @param bookId
-	 * @return
+	 * @param bookId 小说ID
+	 * @return 评论列表
 	 */
 	@Api
 	@Operation(summary = "小说根评论")

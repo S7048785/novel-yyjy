@@ -10,7 +10,7 @@ import com.novel.service.UserService;
 import com.novel.user.dto.user.UserInfoView;
 import com.novel.user.dto.user.UserLoginInput;
 import com.novel.user.dto.user.UserLoginView;
-import com.novel.vo.DashboardStatistics;
+import com.novel.vo.DashboardStatisticsVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,8 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Nyxcirea
- * @date 2026/3/11
- * @description: TODO
+ * date 2026/3/11
  */
 @Slf4j
 @Api
@@ -70,9 +69,9 @@ public class AdminController {
 	@Cacheable(cacheNames = "dashboardCache")
 	@Operation(summary = "仪表盘数据")
 	@GetMapping("/dashboard")
-	public Result<DashboardStatistics> dashboard() {
+	public Result<DashboardStatisticsVO> dashboard() {
 		//new DashboardStatistics()
-		var result = new DashboardStatistics(
+		var result = new DashboardStatisticsVO(
 				sqlClient
 						.createQuery(BookInfoTable.$)
 						.select(

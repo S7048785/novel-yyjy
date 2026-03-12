@@ -5,12 +5,12 @@ import lombok.Data;
 
 /**
  * @author Nyxcirea
- * @date 2026/3/12
- * @description: TODO
+ * date 2026/3/12
+ * description: 仪表盘数据
  */
 @Data
 @AllArgsConstructor
-public class DashboardStatistics {
+public class DashboardStatisticsVO {
 	private Long novelCount;
 	private Long chapterCount;
 	private Long userCount;

@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 
 /**
  * @author Nyxcirea
- * @date 2026/3/10
- * @description: TODO
+ * date 2026/3/10
+ * description: TODO
  */
 @Slf4j
 @Service
@@ -28,7 +28,7 @@ public class NovelScraperServiceImpl implements NovelScraperService {
 	/**
 	 * 新增小说
 	 *
-	 * @return
+	 * @return 新增小说ID
 	 */
 	@Override
 	public long addNovelById(String bookId) {
@@ -82,27 +82,25 @@ public class NovelScraperServiceImpl implements NovelScraperService {
 				                    .selectCount().execute().get(0);
 		
 		var chapterRes = NovelScraperUtil.scrapeChapters(bookId, chapterCount > 0 ? chapterCount.intValue() : 0, count);
-		var entities = CollUtil.map(chapterRes, (item) -> {
-			return BookContentDraft.$.produce((draft) -> {
-				draft.setContent(item.getBookContent().getContent())
-						.setChapter(BookChapterDraft.$.produce((chapterDraft) -> {
-							chapterDraft.setBookId(dbBookId)
-									.setChapterNum(item.getBookChapter().getChapterNum() - 1)
-									.setChapterName(item.getBookChapter().getChapterName())
-									.setWordCount(item.getBookChapter().getWordCount())
-									.setVipState(0);
-						}));
-			});
-		}, true);
+		var entities = CollUtil.map(chapterRes, (item) -> BookContentDraft.$.produce((draft) -> {
+			draft.setContent(item.getBookContent().getContent())
+					.setChapter(BookChapterDraft.$.produce((chapterDraft) -> {
+						chapterDraft.setBookId(dbBookId)
+								.setChapterNum(item.getBookChapter().getChapterNum() - 1)
+								.setChapterName(item.getBookChapter().getChapterName())
+								.setWordCount(item.getBookChapter().getWordCount())
+								.setVipState(0);
+					}));
+		}), true);
 		var items = sqlClient.saveEntities(entities).getItems();
 		log.info("{} 章节写入成功", items.size());
 		var lastChapter = items.get(items.size() - 1).getModifiedEntity().chapter();
 		var bookTable = BookInfoTable.$;
-		int updatedCount = sqlClient.createUpdate(bookTable)
-				                   .where(bookTable.id().eq(dbBookId))
-				                   .set(bookTable.wordCount(), entities.stream().mapToLong(item -> item.chapter().wordCount()).sum())
-				                   .set(bookTable.lastChapterId(), BigInteger.valueOf(lastChapter.id()))
-				                   .set(bookTable.lastChapterName(), lastChapter.chapterName())
-				                   .set(bookTable.lastChapterUpdateTime(), LocalDateTime.now()).execute();
+		sqlClient.createUpdate(bookTable)
+				.where(bookTable.id().eq(dbBookId))
+				.set(bookTable.wordCount(), entities.stream().mapToLong(item -> item.chapter().wordCount()).sum())
+				.set(bookTable.lastChapterId(), BigInteger.valueOf(lastChapter.id()))
+				.set(bookTable.lastChapterName(), lastChapter.chapterName())
+				.set(bookTable.lastChapterUpdateTime(), LocalDateTime.now()).execute();
 	}
 }
