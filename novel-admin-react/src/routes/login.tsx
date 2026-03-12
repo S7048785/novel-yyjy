@@ -183,6 +183,7 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
   beforeLoad: async () => {
     const isAuthenticated = useUserStore.getState().isAuthenticated;
+    console.log("Login route beforeLoad, isAuthenticated:", isAuthenticated);
     if (isAuthenticated) {
       throw redirect({
         to: "/app/dashboard",

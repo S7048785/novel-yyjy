@@ -29,7 +29,8 @@ export class CommentController {
     /**
      * 小说评论查询接口 顶层评论
      * @parameter {CommentControllerOptions['listBookComments']} options
-     * - bookId 
+     * - bookId 小说ID
+     * @return 评论列表
      */
     readonly listBookComments: (options: CommentControllerOptions['listBookComments']) => Promise<
         Result<PageResult<BookCommentView>>
@@ -81,6 +82,9 @@ export class CommentController {
 
 export type CommentControllerOptions = {
     'listBookComments': {
+        /**
+         * 小说ID
+         */
         readonly bookId: number, 
         readonly pageNo?: number | undefined, 
         readonly pageSize?: number | undefined

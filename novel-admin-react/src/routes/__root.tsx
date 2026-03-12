@@ -6,7 +6,8 @@ import { message } from "antd";
 // 根路由组件
 function RootComponent() {
   const navigate = useNavigate();
-  const setUser = useUserStore((state) => state.setUser); // 初始化用户状态
+  const setUser = useUserStore((state) => state.setUser);
+  const logout = useUserStore((state) => state.logout);
   // 初始化用户状态
   useEffect(() => {
     async function initializeUser() {
@@ -15,7 +16,7 @@ function RootComponent() {
         if (res.code == 1) {
           setUser(res.data);
         } else {
-          message.warning("用户未登录，请先登录");
+          logout();
           navigate({
             to: "/login",
           });

@@ -6,7 +6,6 @@ interface UserState {
   // 用户信息
   userInfo: UserLoginView | null;
   // Token
-  token: string | null;
   // 是否已登录
   isAuthenticated: boolean;
   // 设置用户信息（登录时调用）
@@ -25,7 +24,6 @@ export const useUserStore = create<UserState>()(
       setUser: (user: UserLoginView) => {
         set({
           userInfo: user,
-          token: user.token || null,
           isAuthenticated: true,
         });
       },
@@ -33,7 +31,6 @@ export const useUserStore = create<UserState>()(
       logout: () => {
         set({
           userInfo: null,
-          token: null,
           isAuthenticated: false,
         });
       },
@@ -42,7 +39,6 @@ export const useUserStore = create<UserState>()(
       name: "user-storage",
       partialize: (state) => ({
         userInfo: state.userInfo,
-        token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
     },

@@ -7,3 +7,4 @@ export {CrawlerController} from './CrawlerController';
 export {HomeController} from './HomeController';
 export {NewsController} from './NewsController';
 export {UserController} from './UserController';
+export {UserManagementController} from './UserManagementController';

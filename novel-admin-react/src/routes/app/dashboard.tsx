@@ -15,59 +15,33 @@ const formatter: StatisticProps["formatter"] = (value) => (
   <CountUp end={value as number} separator="," />
 );
 export function Dashboard() {
-  const { data, isLoading, refetch } = useQuery({
+  const [stats, setStats] = useState<any[]>([]);
+  const { data, refetch } = useQuery({
     queryKey: ["dashboardStats"],
     queryFn: async () => {
       const res = await api.adminController.dashboard();
       return res.data;
     },
   });
-  const [stats, setStats] = useState([
-    {
-      title: "小说总数",
-      value: data?.novelCount || 0,
-      icon: <BookOutlined />,
-      color: "#1890ff",
-    },
-    {
-      title: "章节总数",
-      value: data?.chapterCount || 0,
-      icon: <ReadOutlined />,
-      color: "#52c41a",
-    },
-    {
-      title: "用户总数",
-      value: data?.userCount || 0,
-      icon: <UserOutlined />,
-      color: "#faad14",
-    },
-    {
-      title: "采集任务",
-      value: 12,
-      icon: <CloudDownloadOutlined />,
-      color: "#f5222d",
-    },
-  ]);
-
-  async function doRefetch() {
-    const result = await refetch();
-    // refetch 返回的最新数据在 result.data
+  // 当查询结果变化时，将后端数据映射到本地 stats
+  useEffect(() => {
+    if (!data) return;
     setStats([
       {
         title: "小说总数",
-        value: result.data!.novelCount! + 1 || 0,
+        value: data.novelCount ?? 0,
         icon: <BookOutlined />,
         color: "#1890ff",
       },
       {
         title: "章节总数",
-        value: result.data?.chapterCount || 0,
+        value: data.chapterCount ?? 0,
         icon: <ReadOutlined />,
         color: "#52c41a",
       },
       {
         title: "用户总数",
-        value: result.data?.userCount || 0,
+        value: data.userCount ?? 0,
         icon: <UserOutlined />,
         color: "#faad14",
       },
@@ -78,6 +52,10 @@ export function Dashboard() {
         color: "#f5222d",
       },
     ]);
+  }, [data]);
+
+  async function doRefetch() {
+    await refetch();
   }
   return (
     <div>

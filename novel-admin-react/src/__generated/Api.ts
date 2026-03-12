@@ -8,7 +8,8 @@ import {
     CrawlerController, 
     HomeController, 
     NewsController, 
-    UserController
+    UserController, 
+    UserManagementController
 } from './services/';
 
 export class Api {
@@ -16,6 +17,8 @@ export class Api {
     readonly adminController: AdminController
     
     readonly crawlerController: CrawlerController
+    
+    readonly userManagementController: UserManagementController
     
     readonly bookController: BookController
     
@@ -34,6 +37,7 @@ export class Api {
     constructor(executor: Executor) {
         this.adminController = new AdminController(executor);
         this.crawlerController = new CrawlerController(executor);
+        this.userManagementController = new UserManagementController(executor);
         this.bookController = new BookController(executor);
         this.captchaController = new CaptchaController(executor);
         this.chapterCommentController = new ChapterCommentController(executor);
