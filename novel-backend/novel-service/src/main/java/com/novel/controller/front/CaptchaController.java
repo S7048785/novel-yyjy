@@ -4,6 +4,8 @@ import com.google.code.kaptcha.impl.DefaultKaptcha;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.babyfish.jimmer.client.meta.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+@Slf4j
+@Api
 @Tag(name = "验证码控制器")
 @Controller
 @RequestMapping("/captcha")
@@ -30,6 +34,7 @@ public class CaptchaController {
 	 * @param response 用于设置响应头和输出流的HttpServletResponse对象
 	 * @throws IOException 如果在写入图片到输出流时发生错误
 	 */
+	@Api
 	@GetMapping
 	public void getCaptcha(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		// 禁止缓存此响应，确保每次请求都生成新的验证码
@@ -45,6 +50,7 @@ public class CaptchaController {
 		String capText = defaultKaptcha.createText();
 		// 将验证码文本存储在会话中，供后续验证使用
 		request.getSession().setAttribute("captcha", capText);
+		log.info("验证码: {}", capText);
 		
 		// 根据验证码文本生成验证码图片
 		BufferedImage bi = defaultKaptcha.createImage(capText);

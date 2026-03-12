@@ -85,7 +85,7 @@ input AllBookQueryInput {
     @Schema(description = "频道id")
     channelId: Int?
     @Schema(description = "分类id")
-    categoryId: Int?
+    categoryId: Long?
     @Schema(description = "小说状态 0-连载中 1-完结")
     overState: Int?
     @Schema(description = "字数 0. 30万以内 1. 50万以内 2. 30万以上 3. 50万以上")

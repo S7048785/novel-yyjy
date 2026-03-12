@@ -4,18 +4,21 @@ novel:
     host: localhost
     port: 3306
     database: novel
-    username:
-    password:
+    username: root
+    password: 5211314
   jwt:
     # jwt签名加密时使用的密钥
-    secret-key:
+    secret-key: awsl
     # jwt过期时间 2小时 (=2 * 60 * 60 * 1000)
     ttl: 7200000
-  front: http://localhost:5173
+  front:
+    ip:
+      - http://localhost:3000
+      - http://localhost:5173
   oss:
     endpoint: http://oss-cn-beijing.aliyuncs.com
-    bucket-name:
-    region:
+    bucket-name: java-web-lws
+    region: cn-beijing
   exclude:
     path:
       - /user/login
@@ -36,20 +39,10 @@ novel:
       - /comment/top
       - /comment/child
 
-jimmer:
-  dialect: org.babyfish.jimmer.sql.dialect.MySqlDialect
-  show-sql: false
-  pretty-sql: false
-  database-validation-mode: ERROR
-
-springdoc:
-  # 默认是false，需要设置为true
-  default-flat-param-object: true
-
 sa-token:
   # jwt秘钥
   jwt-secret-key: awsl
 
 es:
-  host:
+  host: 192.168.229.128
   port: 9200

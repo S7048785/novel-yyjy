@@ -11,11 +11,13 @@ import com.novel.utils.IpUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import org.babyfish.jimmer.client.meta.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Api
 @Tag(name = "评论")
 @RestController
 @RequestMapping("/comment")
@@ -29,6 +31,7 @@ public class CommentController {
 	 * @param bookId
 	 * @return
 	 */
+	@Api
 	@Operation(summary = "小说根评论")
 	@GetMapping("/top")
 	public Result<PageResult<BookCommentView>> listBookComments(
@@ -39,6 +42,7 @@ public class CommentController {
 		return Result.ok(pageResult);
 	}
 	
+	@Api
 	@Operation(summary = "小说子评论")
 	@GetMapping("/child")
 	public Result<List<BookSubCommentView>> listBookComments(
@@ -48,6 +52,7 @@ public class CommentController {
 		return Result.ok(list);
 	}
 	
+	@Api
 	@SaCheckLogin
 	@Operation(summary = "发布评论")
 	@PostMapping("/add")
@@ -58,6 +63,7 @@ public class CommentController {
 		return Result.ok(bookCommentView);
 	}
 	
+	@Api
 	@SaCheckLogin
 	@Operation(summary = "删除评论")
 	@DeleteMapping("{id}")

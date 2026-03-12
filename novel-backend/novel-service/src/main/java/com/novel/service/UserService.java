@@ -33,4 +33,6 @@ public interface UserService {
 	void delete(Long id);
 	
 	PageResult<com.novel.admin.dto.user.UserInfoView> page(UserPageQueryReq req);
+	
+	UserLoginView loginForAdmin(UserLoginInput userLoginInput);
 }

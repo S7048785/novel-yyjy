@@ -37,8 +37,7 @@ public class BookRepository {
 	private final BookInfoTable bookInfo = BookInfoTable.$;
 	
 	public BookInfoView findBookInfoById(long bookId) {
-		BookInfoView book = sqlClient.findById(BookInfoView.class, bookId);
-		return book;
+		return sqlClient.findById(BookInfoView.class, bookId);
 	}
 	
 	/**
@@ -82,9 +81,7 @@ public class BookRepository {
 		 */
 		
 		return sqlClient.createQuery(BookInfoTable.$)
-				       .orderBy(BookInfoTable.$.createTime())
-				       .orderBy(BookInfoTable.$.score().desc())
-				       .orderBy(BookInfoTable.$.visitCount().desc())
+				       .orderBy(BookInfoTable.$.createTime().desc(), BookInfoTable.$.score().desc(), BookInfoTable.$.visitCount().desc())
 				       .select(BookInfoTable.$.fetch(HomeBookRankView.class))
 				       .limit(10)
 				       .execute();
@@ -169,7 +166,7 @@ public class BookRepository {
 		
 		var page = sqlClient.createQuery(bookInfo)
 				           .where(bookInfo.workDirection().eqIf(params.getChannelId()))
-				           .where(bookInfo.categoryId().eqIf(params.getCategoryId() != null, Long.valueOf(params.getCategoryId())))
+				           .where(bookInfo.categoryId().eqIf(params.getCategoryId()))
 				           .where(bookInfo.bookStatus().eqIf(params.getOverState()))
 				           .where(bookInfo.wordCount().betweenIf(wordCountMin, wordCountMax))
 				           .where(bookInfo.lastChapterUpdateTime().ltIf(params.getUpdateDay() != null, LocalDateTime.now().minusDays(params.getUpdateDay() == null ? 0 : params.getUpdateDay())))

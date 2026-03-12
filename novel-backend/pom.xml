@@ -44,9 +44,17 @@
         <jackson.version>2.15.2</jackson.version>
         <kaptcha.version>2.3.2</kaptcha.version>
         <elasticsearch.version>7.12.1</elasticsearch.version>
+        <jsoup.version>1.17.2</jsoup.version>
     </properties>
     <dependencyManagement>
         <dependencies>
+
+            <!-- Jsoup: 用于解析 HTML，相当于 BeautifulSoup -->
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup.version}</version>
+            </dependency>
 <!--            ES搜索引擎 -->
             <dependency>
                 <groupId>org.elasticsearch.client</groupId>
@@ -142,7 +150,11 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.8.9</version>
         </dependency>
-
+        <!--Spring Cache-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
         <!--Spring Data Redis-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

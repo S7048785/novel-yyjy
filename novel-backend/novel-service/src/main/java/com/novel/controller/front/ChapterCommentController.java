@@ -3,8 +3,6 @@ package com.novel.controller.front;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.novel.dto.req.SegmentCommentPageQueryReq;
 import com.novel.po.chapterSummary.ChapterSummary;
-import com.novel.po.comment.BookComment;
-import com.novel.po.comment.SegmentComment;
 import com.novel.result.PageResult;
 import com.novel.result.Result;
 import com.novel.service.ChapterCommentService;
@@ -14,6 +12,7 @@ import com.novel.utils.IpUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import org.babyfish.jimmer.client.meta.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +22,7 @@ import java.util.List;
  * 章节段落控制器
  * @author YYJY
  */
+@Api
 @Tag(name = "章节评论")
 @RequestMapping("/chapter-comment")
 @RestController
@@ -31,6 +31,7 @@ public class ChapterCommentController {
 	@Autowired
 	private ChapterCommentService service;
 	
+	@Api
 	@Operation(summary = "获取章节的概要列表信息")
 	@GetMapping("summary")
 	public Result<List<ChapterSummary>> getCommentSummaryList(long bookId, long chapterId) {
@@ -38,6 +39,7 @@ public class ChapterCommentController {
 		return Result.ok(list);
 	}
 	
+	@Api
 	@SaCheckLogin
 	@Operation(summary = "添加章节段落评论")
 	@PostMapping("add")
@@ -47,12 +49,14 @@ public class ChapterCommentController {
 		return Result.ok(service.addChapterSummary(ip, address,comment));
 	}
 	
+	@Api
 	@Operation(summary = "获取段落评论")
 	@GetMapping("list")
 	public Result<PageResult<SegmentCommentView>> listSegmentComment(SegmentCommentPageQueryReq query) {
 		return Result.ok(service.listSegmentComment(query));
 	}
 	
+	@Api
 	@Operation(summary = "点赞 - 未完成")
 	@PostMapping("like")
 	public Result<Void> like(long commentId) {
@@ -60,6 +64,7 @@ public class ChapterCommentController {
 		return Result.ok();
 	}
 	
+	@Api
 	@Operation(summary = "删除评论")
 	@DeleteMapping("delete")
 	public Result<Void> delete(long commentId) {

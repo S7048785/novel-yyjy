@@ -2,7 +2,6 @@ package com.novel.controller.front;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
-import com.novel.context.BaseContext;
 import com.novel.exception.BaseException;
 import com.novel.result.Result;
 import com.novel.service.UserService;
@@ -13,7 +12,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
+import org.babyfish.jimmer.client.meta.Api;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +29,7 @@ import java.util.List;
 /**
  * @author YYJY
  */
+@Api
 @Slf4j
 @Tag(name = "用户")
 @RestController
@@ -39,6 +41,7 @@ public class UserController {
 	@Autowired
 	private AliyunOSSUtils aliyunOSSUtils;
 	
+	@Api
 	@Operation(summary = "登录")
 	@PostMapping("/login")
 	public Result<UserLoginView> login(HttpServletRequest request, @Validated @RequestBody UserLoginInput userLoginInput) {
@@ -61,6 +64,8 @@ public class UserController {
 		return Result.ok(user);
 	}
 	
+	@Api
+	@CacheEvict(cacheNames = "dashboardCache")
 	@Operation(summary = "注册")
 	@PostMapping("/register")
 	public Result<UserLoginView> register(HttpServletRequest request, @Validated @RequestBody UserRegisterInput userRegisterInput) {
@@ -75,6 +80,7 @@ public class UserController {
 		return Result.ok(user);
 	}
 	
+	@Api
 	@SaCheckLogin
 	@Operation(summary = "上传头像")
 	@PostMapping("/upload")
@@ -91,6 +97,7 @@ public class UserController {
 		return Result.ok(url);
 	}
 	
+	@Api
 	@Operation(summary = "获取用户信息")
 	@GetMapping("/info")
 	public Result<UserInfoView> getUserInfo() {
@@ -98,6 +105,7 @@ public class UserController {
 		return Result.ok(user);
 	}
 	
+	@Api
 	@SaCheckLogin
 	@Operation(summary = "修改昵称")
 	@PutMapping("/nickName")
@@ -106,6 +114,7 @@ public class UserController {
 		return Result.ok();
 	}
 	
+	@Api
 	@SaCheckLogin
 	@Operation(summary = "历史浏览")
 	@GetMapping("/history")
@@ -113,6 +122,7 @@ public class UserController {
 		return Result.ok(userService.listHistory());
 	}
 	
+	@Api
 	@SaCheckLogin
 	@Operation(summary = "书架")
 	@GetMapping("/bookshelf")
@@ -120,6 +130,7 @@ public class UserController {
 		return Result.ok(userService.listBookshelf());
 	}
 	
+	@Api
 	@SaCheckLogin
 	@Operation(summary = "添加/移除书架")
 	@PutMapping("/bookshelf")

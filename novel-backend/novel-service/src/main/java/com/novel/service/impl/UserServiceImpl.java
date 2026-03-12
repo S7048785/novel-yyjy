@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -117,5 +116,21 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public PageResult<com.novel.admin.dto.user.UserInfoView> page(UserPageQueryReq req) {
 		return userRepository.page(req);
+	}
+	
+	@Override
+	public UserLoginView loginForAdmin(UserLoginInput userLoginInput) {
+		// 查询用户信息
+		UserInfo userInfo = userRepository.getUserInfoByEmail(userLoginInput.getEmail());
+		
+		// 校验用户密码
+		if (!userInfo.password().equals(userLoginInput.getPassword())) {
+			throw new BaseException( MessageConstant.ACCOUNT_OR_PASSWORD_NOT_FOUND);
+		}
+		if (!userInfo.role().equals("admin")) {
+			throw new BaseException("该用户没有管理员权限");
+		}
+		return new UserLoginView(userInfo);
+		
 	}
 }
