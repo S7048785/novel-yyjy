@@ -1,8 +1,10 @@
 package com.novel.service;
 
 import com.novel.admin.dto.user.UserAddInput;
-import com.novel.admin.dto.user.UserUpdateInput;
+import com.novel.dto.req.AdminLoginReq;
 import com.novel.dto.req.UserPageQueryReq;
+import com.novel.dto.req.UserUpdateReq;
+import com.novel.po.user.UserInfo;
 import com.novel.result.PageResult;
 import com.novel.user.dto.user.*;
 
@@ -28,11 +30,11 @@ public interface UserService {
 	
 	void addUser(UserAddInput user);
 	
-	void updateUser(UserUpdateInput user);
+	void updateUser(UserUpdateReq user);
 	
 	void delete(Long id);
 	
-	PageResult<com.novel.admin.dto.user.UserInfoView> page(UserPageQueryReq req);
+	PageResult<UserInfo> page(UserPageQueryReq req);
 	
-	UserLoginView loginForAdmin(UserLoginInput userLoginInput);
+	UserLoginView loginForAdmin(AdminLoginReq user);
 }

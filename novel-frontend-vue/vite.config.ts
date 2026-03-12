@@ -13,7 +13,9 @@ export default defineConfig({
 	plugins: [vueDevTools(
 			// 禁用插件生成的客户端 CSS 文件
 			// clientCss: false // 关键配置，若不存在可尝试其他相关参数（如 `injectCss: false`）
-	),vue(), UnoCSS(), vueDevTools(),
+	),vue(), UnoCSS(), vueDevTools({
+		launchEditor: "webstorm"
+	}),
 		AutoImport({
 			imports: [
 				'vue',

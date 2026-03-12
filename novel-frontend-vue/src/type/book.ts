@@ -78,6 +78,9 @@ export type BookRankView = {
   lastChapterName: string;
   authorName: string;
   wordCount: number;
+  picUrl?: string;
+  bookDesc?: string;
+  lastChapterId?: string;
 };
 
 export type BookContentView = {

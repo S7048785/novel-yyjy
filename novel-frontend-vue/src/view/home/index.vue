@@ -159,8 +159,8 @@ onMounted(async () => {
 		<a-spin tip="加载中..." size="large"/>
 	</div>
 
-	<div v-else>
-		<div>
+	<div v-else class="max-w-7xl mx-auto">
+		<div >
 			<div class="grid grid-cols-3 my-4">
 				<!--				轮播图-->
 				<div class="col-span-2">
@@ -171,9 +171,9 @@ onMounted(async () => {
 				<Week :data="homeBookData.weekCommend"></Week>
 			</div>
 
-			<div class="flex gap-4">
+			<div class="grid grid-cols-[4fr_1fr] gap-4 mb-4">
 <!--				热门推荐-->
-				<Hot :data="homeBookData.hotRecommend" class="flex-1"></Hot>
+				<Hot :data="homeBookData.hotRecommend" class=""></Hot>
 <!--				点击榜-->
 				<VisitRank :data="homeBookData.visitRank" class=""></VisitRank>
 			</div>

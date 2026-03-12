@@ -3,6 +3,7 @@ export com.novel.po.user.UserInfo
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
+import java.time.LocalDateTime
 
 @Schema(description = "用户信息")
 UserInfoView {
@@ -23,13 +24,12 @@ input UserAddInput {
     @Pattern(regexp = "^(admin|user)$", message = "role字段只能是admin或user")
     role
     status
-    createTime
 }
 
 @Schema(description = "用户信息添加和编辑")
 input UserUpdateInput {
     @NotBlank
-    id
+    id: String
     @NotBlank
     email
     @NotBlank

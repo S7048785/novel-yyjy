@@ -7,18 +7,15 @@ import type {VisitRankBookView} from "@/type/home.ts";
 const {data} = defineProps<{
 	data: VisitRankBookView[]
 }>()
-const segmenteds = reactive(['周榜', '总榜']);
-const value = ref(segmenteds[0]);
 
 </script>
 
 <template>
-	<div class="w-30%">
+	<div class="h-full">
 		<div class="flex justify-between">
 			<p class="text-xl font-bold pb-2 border-b">点击榜单</p>
-			<a-segmented class="bg-gray-200" v-model:value="value" :options="segmenteds" />
 		</div>
-		<ul class="border bg-white px-4">
+		<ul class="border bg-white px-4 h-[calc(100%-32px)] overflow-y-auto">
 			<li v-for="(item, index) in data" class="my-3">
 				<div v-if="index === 0" class="">
 					<a-tag color="#f50" style="font-weight: bold;margin-bottom: 8px;">NO.1</a-tag>

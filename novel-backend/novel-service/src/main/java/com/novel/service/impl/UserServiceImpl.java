@@ -2,9 +2,10 @@ package com.novel.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.novel.admin.dto.user.UserAddInput;
-import com.novel.admin.dto.user.UserUpdateInput;
 import com.novel.constant.MessageConstant;
+import com.novel.dto.req.AdminLoginReq;
 import com.novel.dto.req.UserPageQueryReq;
+import com.novel.dto.req.UserUpdateReq;
 import com.novel.exception.BaseException;
 import com.novel.po.user.UserInfo;
 import com.novel.po.user.UserInfoDraft;
@@ -100,11 +101,11 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public void addUser(UserAddInput user) {
-		userRepository.save(UserInfoDraft.$.produce(user.toEntity(),draft -> draft.setUpdateTime(LocalDateTime.now())));
+		userRepository.save(user.toEntity());
 	}
 	
 	@Override
-	public void updateUser(UserUpdateInput user) {
+	public void updateUser(UserUpdateReq user) {
 		userRepository.updateUser(user);
 	}
 	
@@ -114,17 +115,17 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	public PageResult<com.novel.admin.dto.user.UserInfoView> page(UserPageQueryReq req) {
+	public PageResult<UserInfo> page(UserPageQueryReq req) {
 		return userRepository.page(req);
 	}
 	
 	@Override
-	public UserLoginView loginForAdmin(UserLoginInput userLoginInput) {
+	public UserLoginView loginForAdmin(AdminLoginReq user) {
 		// 查询用户信息
-		UserInfo userInfo = userRepository.getUserInfoByEmail(userLoginInput.getEmail());
+		UserInfo userInfo = userRepository.getUserInfoByEmail(user.getUsername());
 		
 		// 校验用户密码
-		if (!userInfo.password().equals(userLoginInput.getPassword())) {
+		if (!userInfo.password().equals(user.getPassword())) {
 			throw new BaseException( MessageConstant.ACCOUNT_OR_PASSWORD_NOT_FOUND);
 		}
 		if (!userInfo.role().equals("admin")) {

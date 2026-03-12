@@ -1,149 +1,250 @@
 <script setup lang="ts">
-
-import {getBookRankAPI} from "@/api/book.ts";
-import type {BookRankView} from "@/type/book.ts";
-
+import { getBookRankAPI } from "@/api/book.ts";
+import type { BookRankView } from "@/type/book.ts";
+import router from "@/router";
 
 const rankList = [
-	{
-		id: 1,
-		name: '点击榜'
-	},
-	{
-		id: 2,
-		name: '新书榜'
-	},
-	{
-		id: 3,
-		name: '更新榜'
-	},
-	{
-		id: 4,
-		name: '评论榜'
-	}
+  { id: 1, name: '点击榜', icon: '🔥' },
+  { id: 2, name: '新书榜', icon: '📚' },
+  { id: 3, name: '更新榜', icon: '✨' },
+  { id: 4, name: '评论榜', icon: '💬' }
 ]
-const rankData = ref<BookRankView[]>();
+
+const rankData = ref<BookRankView[]>([]);
 const selectedIndex = ref(0);
+const loading = ref(true);
+const hoverIndex = ref<number | null>(null);
 
 const getRankBookData = async () => {
-	const res = await getBookRankAPI(rankList[selectedIndex.value].id);
-	rankData.value = res.data;
-	rankData.value.forEach((item, index) => {
-		item.index = index + 1;
-	})
+  loading.value = true;
+  try {
+    const res = await getBookRankAPI(rankList[selectedIndex.value].id);
+    rankData.value = res.data;
+    rankData.value.forEach((item, index) => {
+      item.index = index + 1;
+    });
+  } catch (error) {
+    console.error('获取排行榜数据失败:', error);
+  } finally {
+    loading.value = false;
+  }
 }
 
 const changeRank = (index: number) => {
-	selectedIndex.value = index;
-	getRankBookData();
+  selectedIndex.value = index;
+  getRankBookData();
 }
 
-const loading = ref(true)
+const goToBook = (id: string) => {
+  router.push(`/info/${id}`);
+}
+
+const goToChapter = (bookId: string, chapterId: string) => {
+  router.push(`/read/${bookId}/${chapterId}`);
+}
+
 onMounted(() => {
-	getRankBookData();
-	loading.value = false
-})
+  getRankBookData();
+});
+
+// 格式化字数
+const formatWordCount = (count: number) => {
+  if (count >= 10000) {
+    return `${(count / 10000).toFixed(1)}万字`;
+  }
+  return `${count}字`;
+};
+
+// 获取排名徽章样式
+const getRankBadgeClass = (rank: number) => {
+  if (rank === 1) return 'bg-gradient-to-br from-yellow-400 to-orange-500';
+  if (rank === 2) return 'bg-gradient-to-br from-gray-300 to-gray-500';
+  if (rank === 3) return 'bg-gradient-to-br from-orange-300 to-orange-600';
+  return 'bg-gray-400';
+};
+
+// 获取排名徽章图标
+const getRankBadgeIcon = (rank: number) => {
+  if (rank === 1) return '👑';
+  if (rank === 2) return '🥈';
+  if (rank === 3) return '🥉';
+  return '';
+};
 </script>
 
 <template>
-	<div v-if="loading" class="h-130 bg-white flex items-center justify-center rounded-lg p-5">
-		<a-spin tip="加载中..." size="large"/>
-	</div>
-	<div v-else class="flex justify-between">
-		<!-- 榜单-->
-		<div class="p5 w190 bg-white rounded-lg">
-			<p class="text-2xl font-bold">{{rankList[selectedIndex].name}}</p>
-			<a-table
-					class="mt-3"
-					:pagination="false"
-					:data-source="rankData"
-					size="small">
-				<a-table-column key="index" title="序号" align="center" :width="50" data-index="index">
-					<template #default="{ text: index }">
-						<div
-								:class="{'bg-red-500': index === 1, 'bg-[#e67225]': index === 2, 'bg-[#e6bf25]': index === 3, 'bg-gray': index > 3}"
-								class="text-white inline-block w-5 text-12px">
-							{{ index }}
-						</div>
-					</template>
-				</a-table-column>
-				<a-table-column key="categoryName" title="分类" :width="80" data-index="categoryName">
-					<template #default="{ text: categoryName}">
-						<!--									TODO: 路由跳转：分类参数-->
-						<RouterLink class="text-gray-400" :to="`/info/1`">
-							{{ categoryName }}
-						</RouterLink>
-					</template>
-				</a-table-column>
-				<a-table-column key="bookName" title="书名" :width="180" data-index="bookName">
-					<template #default="{ text: bookName, record: { id }}">
-						<RouterLink :to="`/info/${id}`" class="text-hidden">
-							{{ bookName }}
-						</RouterLink>
-					</template>
-				</a-table-column>
-				<!--									TODO: 路由跳转：章节参数-->
-				<a-table-column key="lastChapterName" title="最新章节" ellipsis="true" data-index="lastChapterName">
-					<template #default="{ text }">
-						<RouterLink class="text-12px" :to="`/info/1`">
-							{{ text }}
-						</RouterLink>
-					</template>
-				</a-table-column>
-				<a-table-column key="authorName" title="作者" :width="80" ellipsis="true" data-index="authorName">
-					<template #default="{ text: authorName }">
-									<span class="text-gray-400 text-12px">
-											{{ authorName }}
-									</span>
-					</template>
-				</a-table-column>
-				<a-table-column key="wordCount" align="center" title="字数" :width="90"
-												data-index="wordCount">
-					<template #default="{ text: wordCount }">
-									<span class="text-gray-400 text-12px">
-										{{ (wordCount / 10000).toFixed(2) }}万
-									</span>
-					</template>
-				</a-table-column>
-			</a-table>
-		</div>
-		<!--	选项-->
-		<div class="py5 w60 h-fit bg-white  rounded-lg">
-			<p class="font-bold text-xl px-4">排行榜</p>
-			<ul class="mt-2">
+  <div class="min-h-screen bg-gray-50 py-3">
+    <div class="max-w-5xl mx-auto px-3">
+      <!-- 页面标题 -->
+      <div class="mb-4 text-center">
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">小说排行榜</h1>
+        <p class="text-gray-600 text-xs">发现最受欢迎的精彩作品</p>
+      </div>
 
-				<li v-for="(item, index) in rankList" :key="item.id" class="mt-2 px-2">
-					<a-button
-							@click="changeRank(index)"
-							type="text"
-							:class="{'text-blue!': selectedIndex === index}"
-							class="text-black p2 h-full w-full text-left text-16px">{{item.name}}</a-button>
-				</li>
+      <!-- 榜单分类选择 -->
+      <div class="flex justify-center mb-4">
+        <div class="bg-white rounded-md shadow-sm p-0.5 flex gap-0.5">
+          <button
+            v-for="(item, index) in rankList"
+            :key="item.id"
+            @click="changeRank(index)"
+            :class="[
+              'px-4 py-1.5 rounded-sm font-medium transition-all duration-300 flex items-center gap-1.5 text-xs',
+              selectedIndex === index
+                ? 'bg-blue-500 text-white shadow-sm transform scale-105'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            ]"
+          >
+            <span class="text-sm">{{ item.icon }}</span>
+            <span>{{ item.name }}</span>
+          </button>
+        </div>
+      </div>
 
-			</ul>
-		</div>
-	</div>
+      <!-- 排行榜内容 -->
+      <div v-if="loading" class="flex justify-center items-center h-64">
+        <a-spin size="large" tip="加载中..." />
+      </div>
 
+      <div v-else>
+        <!-- 列表项 -->
+        <TransitionGroup name="list" tag="div" class="space-y-3">
+          <div
+            v-for="(book, index) in rankData"
+            :key="`${book.id}-${selectedIndex}`"
+            @mouseenter="hoverIndex = index"
+            @mouseleave="hoverIndex = null"
+            @click="goToBook(book.id)"
+            :class="[
+              'bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden',
+              'transform hover:-translate-y-0.5',
+              index === 0 ? 'ring-2 ring-yellow-400 ring-opacity-50' : ''
+            ]"
+          >
+          <div class="p-2">
+            <div class="flex gap-3">
+              <!-- 排名徽章 -->
+              <div class="flex-shrink-0">
+                <div
+                  :class="[
+                    'w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base shadow-md',
+                    getRankBadgeClass(book.index!)
+                  ]"
+                >
+                  {{ getRankBadgeIcon(book.index!) || book.index }}
+                </div>
+              </div>
+
+              <!-- 书籍信息 -->
+              <div class="flex-1 grid grid-cols-[112px_1fr] gap-3">
+                <!-- 左侧：书籍图片 -->
+                <div class="">
+                  <div class="relative overflow-hidden rounded-md shadow-sm w-[112px] h-[156px] group">
+                    <img
+                      :src="book.picUrl || '/image/default.png'"
+                      :alt="book.bookName"
+											onerror="this.src = '/image/default.png'"
+                      class="w-full h-full object-cover transform transition-all duration-300 ease-in-out group-hover:scale-110"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                    <!-- 分类标签 -->
+                    <span class="absolute top-1 left-1 px-1.5 py-0.5 bg-blue-500 text-white text-xs rounded-full z-10">
+                      {{ book.categoryName }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 右侧：详细信息 -->
+                <div class=" flex flex-col justify-between">
+                  <!-- 标题和作者 -->
+                  <div>
+                    <h3 class="text-base font-bold text-gray-800 mb-0.5 hover:text-blue-500 transition-colors">
+                      {{ book.bookName }}
+                    </h3>
+                    <p class="text-gray-600 mb-1 text-xs">
+                      <span class="mr-2">作者：{{ book.authorName }}</span>
+                      <span>{{ formatWordCount(book.wordCount) }}</span>
+                    </p>
+                  </div>
+
+                  <!-- 简介 -->
+                  <div v-if="book.bookDesc" v-html="book.bookDesc" class="text-gray-700 mb-1 text-xs line-clamp-2">
+                  </div>
+                  <div v-else class="text-gray-500 mb-1 italic text-xs">
+                    暂无简介
+                  </div>
+
+                  <!-- 最新章节 -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5 text-xs">
+                      <span class="text-gray-500">最新章节：</span>
+                      <a
+                        href="javascript:void(0)"
+                        @click.stop="goToChapter(book.id, book.lastChapterId || '')"
+                        class="text-blue-500 hover:text-blue-700 hover:underline truncate max-w-xs"
+                      >
+                        {{ book.lastChapterName }}
+                      </a>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="flex gap-1.5">
+                      <button
+                        @click.stop="goToBook(book.id)"
+                        class="px-2 py-1 bg-blue-500 text-white rounded-sm hover:bg-blue-600 transition-colors text-xs"
+                      >
+                        开始阅读
+                      </button>
+                      <button
+                        class="px-2 py-1 border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors text-xs"
+                      >
+                        加入书架
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 动画线条 -->
+            <div
+              v-if="hoverIndex === index"
+              class="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-blue-400 to-blue-600 animate-pulse"
+              :style="{ animationDuration: '2s' }"
+            ></div>
+          </div>
+        </div>
+        </TransitionGroup>
+      </div>
+
+      <!-- 底部提示 -->
+      <div v-if="!loading && rankData.length === 0" class="text-center py-16">
+        <p class="text-gray-500 text-lg">暂无数据</p>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-:deep(.ant-table-thead) {
-	.ant-table-cell {
-		background: #f8f8f8;
-		color: gray;
-		font-weight: 400;
-	}
+/* 文字截断 */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-/* 覆盖antda表格内标签悬浮后的颜色 */
-a.hidden-over-color {
-	&:hover {
-		color: inherit;
-	}
+/* 列表动画 */
+.list-enter-active {
+  transition: all 0.5s ease-out;
 }
 
-/* 隐藏antd表头分割线 */
-:deep(:where(.css-dev-only-do-not-override-b92jn9).ant-table-wrapper .ant-table-thead >tr>th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before, :where(.css-dev-only-do-not-override-b92jn9).ant-table-wrapper .ant-table-thead >tr>td:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before) {
-	display: none;
+.list-enter-from {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.list-move {
+  transition: transform 0.5s ease;
 }
 </style>

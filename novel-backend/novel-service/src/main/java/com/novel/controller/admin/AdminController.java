@@ -2,13 +2,13 @@ package com.novel.controller.admin;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.stp.StpUtil;
+import com.novel.dto.req.AdminLoginReq;
 import com.novel.po.book.BookChapterTable;
 import com.novel.po.book.BookInfoTable;
 import com.novel.po.user.UserInfoTable;
 import com.novel.result.Result;
 import com.novel.service.UserService;
 import com.novel.user.dto.user.UserInfoView;
-import com.novel.user.dto.user.UserLoginInput;
 import com.novel.user.dto.user.UserLoginView;
 import com.novel.vo.DashboardStatisticsVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,27 +41,34 @@ public class AdminController {
 	@Api
 	@Operation(summary = "管理员登录")
 	@PostMapping("/login")
-	public Result<UserLoginView> login(HttpServletRequest request, @Validated @RequestBody UserLoginInput userLoginInput) {
+	public Result<UserLoginView> login(HttpServletRequest request, @Validated @RequestBody AdminLoginReq loginReq) {
 		String captcha = (String) request.getSession().getAttribute("captcha");
-		String captcha1 = userLoginInput.getCaptcha();
+		String captcha1 = loginReq.getCaptcha();
 		log.info("captcha: {}, captcha1: {}", captcha, captcha1);
 		
 		if (captcha == null || !captcha.equals(captcha1)) {
 			return Result.fail("验证码错误");
 		}
-		UserLoginView user = userService.loginForAdmin(userLoginInput);
+		UserLoginView user = userService.loginForAdmin(loginReq);
 		
 		StpUtil.login(user.getId());
 		return Result.ok(user);
 	}
 	
 	@Api
-	@SaCheckRole("admin")
 	@Operation(summary = "获取登录信息")
 	@GetMapping("/me")
 	public Result<UserInfoView> me() {
 		UserInfoView user = userService.getUserInfo();
 		return Result.ok(user);
+	}
+	
+	@Api
+	@Operation(summary = "退出登录")
+	@PostMapping("/logout")
+	public Result<Void> logout() {
+		StpUtil.logout();
+		return Result.ok();
 	}
 	
 	@Api

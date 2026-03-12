@@ -19,11 +19,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
@@ -87,7 +82,7 @@ public class UserController {
 	@PostMapping("/upload")
 	public Result<String> upload(@RequestPart MultipartFile file) throws Exception {
 		
-		if (!isImage(file)) {
+		if (!aliyunOSSUtils.isImage(file)) {
 			throw new BaseException("请上传正确格式的图片");
 		}
 		
@@ -140,19 +135,5 @@ public class UserController {
 		return Result.ok();
 	}
 
-	/**
-	 * 通过读取文件并获取其width及height的方式，来判断判断当前文件是否图片，这是一种非常简单的方式。
-	 */
-	public boolean isImage(MultipartFile imageFile) {
-		if (imageFile == null || imageFile.isEmpty()) {
-			return false;
-		}
-		
-		try (InputStream inputStream = new ByteArrayInputStream(imageFile.getBytes())) {
-			BufferedImage image = ImageIO.read(inputStream);
-			return image != null && image.getWidth() > 0 && image.getHeight() > 0;
-		} catch (IOException e) {
-			return false;
-		}
-	}
+	
 }

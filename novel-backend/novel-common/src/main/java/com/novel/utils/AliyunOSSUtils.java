@@ -1,14 +1,20 @@
 package com.novel.utils;
 
-import com.aliyun.oss.*;
+import com.aliyun.oss.ClientBuilderConfiguration;
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.common.auth.CredentialsProviderFactory;
 import com.aliyun.oss.common.auth.EnvironmentVariableCredentialsProvider;
 import com.aliyun.oss.common.comm.SignVersion;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 @Component
@@ -65,4 +71,19 @@ public class AliyunOSSUtils {
 		// return endpoint.split("//")[0] + "//" + bucketName + "." + endpoint.split("//")[1] + "/" + objectName;
 	}
 	
+	/**
+	 * 通过读取文件并获取其width及height的方式，来判断判断当前文件是否图片，这是一种非常简单的方式。
+	 */
+	public boolean isImage(MultipartFile imageFile) {
+		if (imageFile == null || imageFile.isEmpty()) {
+			return false;
+		}
+		
+		try (InputStream inputStream = new ByteArrayInputStream(imageFile.getBytes())) {
+			BufferedImage image = ImageIO.read(inputStream);
+			return image != null && image.getWidth() > 0 && image.getHeight() > 0;
+		} catch (IOException e) {
+			return false;
+		}
+	}
 }

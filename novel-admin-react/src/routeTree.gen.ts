@@ -12,11 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppUsersRouteImport } from './routes/app/users'
 import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
-import { Route as AppCrawlerRouteImport } from './routes/app/crawler'
-import { Route as AppChaptersRouteImport } from './routes/app/chapters'
-import { Route as AppBooksRouteImport } from './routes/app/books'
+import { Route as AppUsersIndexRouteImport } from './routes/app/users/index'
+import { Route as AppCrawlerIndexRouteImport } from './routes/app/crawler/index'
+import { Route as AppChapterIndexRouteImport } from './routes/app/chapter/index'
+import { Route as AppBookIndexRouteImport } from './routes/app/book/index'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -33,29 +33,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppUsersRoute = AppUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
-const AppCrawlerRoute = AppCrawlerRouteImport.update({
-  id: '/crawler',
-  path: '/crawler',
+const AppUsersIndexRoute = AppUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppChaptersRoute = AppChaptersRouteImport.update({
-  id: '/chapters',
-  path: '/chapters',
+const AppCrawlerIndexRoute = AppCrawlerIndexRouteImport.update({
+  id: '/crawler/',
+  path: '/crawler/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppBooksRoute = AppBooksRouteImport.update({
-  id: '/books',
-  path: '/books',
+const AppChapterIndexRoute = AppChapterIndexRouteImport.update({
+  id: '/chapter/',
+  path: '/chapter/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBookIndexRoute = AppBookIndexRouteImport.update({
+  id: '/book/',
+  path: '/book/',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -63,32 +63,32 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
-  '/app/books': typeof AppBooksRoute
-  '/app/chapters': typeof AppChaptersRoute
-  '/app/crawler': typeof AppCrawlerRoute
   '/app/dashboard': typeof AppDashboardRoute
-  '/app/users': typeof AppUsersRoute
+  '/app/book/': typeof AppBookIndexRoute
+  '/app/chapter/': typeof AppChapterIndexRoute
+  '/app/crawler/': typeof AppCrawlerIndexRoute
+  '/app/users/': typeof AppUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
-  '/app/books': typeof AppBooksRoute
-  '/app/chapters': typeof AppChaptersRoute
-  '/app/crawler': typeof AppCrawlerRoute
   '/app/dashboard': typeof AppDashboardRoute
-  '/app/users': typeof AppUsersRoute
+  '/app/book': typeof AppBookIndexRoute
+  '/app/chapter': typeof AppChapterIndexRoute
+  '/app/crawler': typeof AppCrawlerIndexRoute
+  '/app/users': typeof AppUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
-  '/app/books': typeof AppBooksRoute
-  '/app/chapters': typeof AppChaptersRoute
-  '/app/crawler': typeof AppCrawlerRoute
   '/app/dashboard': typeof AppDashboardRoute
-  '/app/users': typeof AppUsersRoute
+  '/app/book/': typeof AppBookIndexRoute
+  '/app/chapter/': typeof AppChapterIndexRoute
+  '/app/crawler/': typeof AppCrawlerIndexRoute
+  '/app/users/': typeof AppUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -96,31 +96,31 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/login'
-    | '/app/books'
-    | '/app/chapters'
-    | '/app/crawler'
     | '/app/dashboard'
-    | '/app/users'
+    | '/app/book/'
+    | '/app/chapter/'
+    | '/app/crawler/'
+    | '/app/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/app'
     | '/login'
-    | '/app/books'
-    | '/app/chapters'
-    | '/app/crawler'
     | '/app/dashboard'
+    | '/app/book'
+    | '/app/chapter'
+    | '/app/crawler'
     | '/app/users'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/login'
-    | '/app/books'
-    | '/app/chapters'
-    | '/app/crawler'
     | '/app/dashboard'
-    | '/app/users'
+    | '/app/book/'
+    | '/app/chapter/'
+    | '/app/crawler/'
+    | '/app/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -152,13 +152,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/users': {
-      id: '/app/users'
-      path: '/users'
-      fullPath: '/app/users'
-      preLoaderRoute: typeof AppUsersRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/dashboard': {
       id: '/app/dashboard'
       path: '/dashboard'
@@ -166,44 +159,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/crawler': {
-      id: '/app/crawler'
+    '/app/users/': {
+      id: '/app/users/'
+      path: '/users'
+      fullPath: '/app/users/'
+      preLoaderRoute: typeof AppUsersIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/crawler/': {
+      id: '/app/crawler/'
       path: '/crawler'
-      fullPath: '/app/crawler'
-      preLoaderRoute: typeof AppCrawlerRouteImport
+      fullPath: '/app/crawler/'
+      preLoaderRoute: typeof AppCrawlerIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/chapters': {
-      id: '/app/chapters'
-      path: '/chapters'
-      fullPath: '/app/chapters'
-      preLoaderRoute: typeof AppChaptersRouteImport
+    '/app/chapter/': {
+      id: '/app/chapter/'
+      path: '/chapter'
+      fullPath: '/app/chapter/'
+      preLoaderRoute: typeof AppChapterIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/books': {
-      id: '/app/books'
-      path: '/books'
-      fullPath: '/app/books'
-      preLoaderRoute: typeof AppBooksRouteImport
+    '/app/book/': {
+      id: '/app/book/'
+      path: '/book'
+      fullPath: '/app/book/'
+      preLoaderRoute: typeof AppBookIndexRouteImport
       parentRoute: typeof AppRoute
     }
   }
 }
 
 interface AppRouteChildren {
-  AppBooksRoute: typeof AppBooksRoute
-  AppChaptersRoute: typeof AppChaptersRoute
-  AppCrawlerRoute: typeof AppCrawlerRoute
   AppDashboardRoute: typeof AppDashboardRoute
-  AppUsersRoute: typeof AppUsersRoute
+  AppBookIndexRoute: typeof AppBookIndexRoute
+  AppChapterIndexRoute: typeof AppChapterIndexRoute
+  AppCrawlerIndexRoute: typeof AppCrawlerIndexRoute
+  AppUsersIndexRoute: typeof AppUsersIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppBooksRoute: AppBooksRoute,
-  AppChaptersRoute: AppChaptersRoute,
-  AppCrawlerRoute: AppCrawlerRoute,
   AppDashboardRoute: AppDashboardRoute,
-  AppUsersRoute: AppUsersRoute,
+  AppBookIndexRoute: AppBookIndexRoute,
+  AppChapterIndexRoute: AppChapterIndexRoute,
+  AppCrawlerIndexRoute: AppCrawlerIndexRoute,
+  AppUsersIndexRoute: AppUsersIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
