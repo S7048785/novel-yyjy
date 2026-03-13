@@ -19,4 +19,7 @@ public class BookDetailResult {
 
     @JsonProperty("book_desc")
     private String bookDesc;
+    
+    @JsonProperty("chapter_count")
+    private int ChapterCount;
 }

@@ -1,5 +1,5 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useRef, useEffect } from "react";
 import {
   Card,
   Form,
@@ -16,57 +16,116 @@ import {
 import {
   CloudDownloadOutlined,
   DeleteOutlined,
-  PlayCircleOutlined,
   CheckCircleOutlined,
-  SyncOutlined,
 } from "@ant-design/icons";
+import { api } from "../../../ApiInstance";
+import type { CrawTaskStatus } from "../../../types/CrawlTaskStatus";
 
 // 采集任务类型
 interface CrawlerTask {
   id: number;
   bookId: string;
+  novelName: string;
   chapterCount: number;
   status: "pending" | "running" | "completed" | "failed";
   progress: number;
   message: string;
   createTime: string;
+  startTime?: string;
+  currentChapter?: number;
+  totalChapters?: number;
 }
-
-// Mock 任务数据
-const mockTasks: CrawlerTask[] = [
-  {
-    id: 1,
-    bookId: "123456",
-    chapterCount: 100,
-    status: "completed",
-    progress: 100,
-    message: "采集完成",
-    createTime: "2024-01-15 10:30:00",
-  },
-  {
-    id: 2,
-    bookId: "789012",
-    chapterCount: 50,
-    status: "running",
-    progress: 65,
-    message: "正在采集第65章",
-    createTime: "2024-01-15 11:00:00",
-  },
-  {
-    id: 3,
-    bookId: "345678",
-    chapterCount: 200,
-    status: "pending",
-    progress: 0,
-    message: "等待中",
-    createTime: "2024-01-15 11:05:00",
-  },
-];
 
 export function Crawler() {
   const [form] = Form.useForm();
-  const [tasks, setTasks] = useState<CrawlerTask[]>(mockTasks);
+  const [tasks, setTasks] = useState<CrawlerTask[]>([]);
   const [loading, setLoading] = useState(false);
+  const sseRef = useRef<EventSource | null>(null);
+
+  // 清理SSE连接
+  useEffect(() => {
+    return () => {
+      if (sseRef.current) {
+        sseRef.current.close();
+      }
+    };
+  }, []);
+
+  // 连接SSE获取进度
+  const connectSSE = (bookId: string, taskId: number): Promise<void> => {
+    return new Promise((resolve) => {
+      // 如果已有连接，先关闭
+      if (sseRef.current) {
+        sseRef.current.close();
+      }
+
+      const BASE_URL =
+        import.meta.env.VITE_API_BASE_URL || "http://localhost:9111";
+      const eventSource = new EventSource(
+        `${BASE_URL}/admin/crawler/stream?bookId=${bookId}`,
+        {
+          withCredentials: true,
+        },
+      );
+
+      // 连接成功后再resolve
+      eventSource.onopen = () => {
+        console.log("SSE连接已建立");
+        resolve();
+      };
+
+      // 使用 addEventListener 监听 named event
+      eventSource.addEventListener("progress", (event: MessageEvent) => {
+        try {
+          const data: CrawTaskStatus = JSON.parse(event.data);
+          console.log("收到进度更新:", data);
+          console.log("当前任务列表:", tasks);
+
+          // 根据消息类型处理 - 找到正在运行的任务进行更新
+          setTasks((prev) => {
+            const runningTaskIndex = prev.findIndex(
+              (t) => t.status === "running",
+            );
+            if (runningTaskIndex === -1) return prev;
+
+            const newTasks = [...prev];
+            const task = newTasks[runningTaskIndex];
+
+            if (data.status === "已完成" || data.status === "completed") {
+              newTasks[runningTaskIndex] = {
+                ...task,
+                status: "completed",
+                progress: 100,
+                message: data.message,
+                novelName: data.novelName || task.novelName,
+              };
+            } else if (data.status === "采集中" || data.status === "running") {
+              newTasks[runningTaskIndex] = {
+                ...task,
+                status: "running",
+                progress: Math.round(data.progress),
+                message: data.message,
+                novelName: data.novelName || task.novelName,
+                currentChapter: data.currentChapter,
+                totalChapters: data.totalChapters,
+              };
+            }
+            return newTasks;
+          });
+        } catch (e) {
+          console.error("解析SSE数据失败:", e);
+        }
+      });
+
+      eventSource.onerror = (error) => {
+        console.error("SSE错误:", error);
+        // 即使出错也resolve，避免无限等待
+        resolve();
+      };
+
+      sseRef.current = eventSource;
+    });
+  };
 
   // 处理采集
   const handleCrawl = async (values: {
@@ -75,59 +134,50 @@ export function Crawler() {
   }) => {
     setLoading(true);
 
-    // 模拟API调用
-    const newTask: CrawlerTask = {
-      id: Math.max(...tasks.map((t) => t.id), 0) + 1,
-      bookId: values.bookId,
-      chapterCount: values.chapterCount || 0,
-      status: "running",
-      progress: 0,
-      message: "开始采集...",
-      createTime: new Date().toLocaleString(),
-    };
+    try {
+      // 先创建任务并显示
+      const newTask: CrawlerTask = {
+        id: Date.now(),
+        bookId: values.bookId,
+        novelName: "获取中...",
+        chapterCount: values.chapterCount || 0,
+        status: "running",
+        progress: 0,
+        message: "正在开始采集...",
+        createTime: new Date().toLocaleString(),
+        startTime: new Date().toLocaleString(),
+      };
 
-    setTasks([newTask, ...tasks]);
-    message.success("已添加采集任务");
+      setTasks([newTask, ...tasks]);
+      message.success("已添加采集任务");
 
-    // 模拟采集进度
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 20;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-        setTasks((prev) =>
-          prev.map((task) =>
-            task.id === newTask.id
-              ? {
-                  ...task,
-                  status: "completed" as const,
-                  progress: 100,
-                  message: "采集完成",
-                }
-              : task,
-          ),
-        );
-        setLoading(false);
-      } else {
-        setTasks((prev) =>
-          prev.map((task) =>
-            task.id === newTask.id
-              ? {
-                  ...task,
-                  progress: Math.round(progress),
-                  message: `正在采集第${Math.round(progress)}章`,
-                }
-              : task,
-          ),
-        );
-      }
-    }, 500);
+      // 先建立SSE连接，等待连接真正建立后再发请求（最多等3秒）
+      await Promise.race([
+        connectSSE(values.bookId, newTask.id),
+        new Promise((resolve) => setTimeout(resolve, 3000)),
+      ]);
+
+      // 调用采集API
+      await api.crawlerController.addNovelById({
+        bookId: values.bookId,
+        chapterCount: values.chapterCount,
+      });
+    } catch (error: any) {
+      message.error(error?.message || "采集失败");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 删除任务
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: number, bookId: string) => {
     setTasks(tasks.filter((task) => task.id !== id));
+    // 如果删除的是当前SSE连接的任务，关闭连接
+    const task = tasks.find((t) => t.id === id);
+    if (task && sseRef.current) {
+      sseRef.current.close();
+      sseRef.current = null;
+    }
     message.success("任务已删除");
   };
 
@@ -196,79 +246,73 @@ export function Crawler() {
 
       {/* 任务列表 */}
       <Card title="采集任务">
-        <List
-          dataSource={tasks}
-          renderItem={(task) => (
-            <List.Item
-              actions={[
-                task.status === "running" ? (
-                  <Button type="link" icon={<SyncOutlined spin />} disabled>
-                    采集中
-                  </Button>
-                ) : task.status === "completed" ? (
+        {tasks.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 40, color: "#999" }}>
+            暂无采集任务
+          </div>
+        ) : (
+          <List
+            dataSource={tasks}
+            renderItem={(task) => (
+              <List.Item
+                actions={[
+                  task.status === "completed" ? (
+                    <Button
+                      type="link"
+                      icon={<CheckCircleOutlined />}
+                      style={{ color: "#52c41a" }}
+                      disabled
+                    >
+                      完成
+                    </Button>
+                  ) : null,
                   <Button
                     type="link"
-                    icon={<CheckCircleOutlined />}
-                    style={{ color: "#52c41a" }}
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDelete(task.id, task.bookId)}
                   >
-                    完成
-                  </Button>
-                ) : (
-                  <Button
-                    type="link"
-                    icon={<PlayCircleOutlined />}
-                    onClick={() => {
-                      setTasks((prev) =>
-                        prev.map((t) =>
-                          t.id === task.id
-                            ? { ...t, status: "running" as const, progress: 0 }
-                            : t,
-                        ),
-                      );
-                    }}
-                  >
-                    开始
-                  </Button>
-                ),
-                <Button
-                  type="link"
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={() => handleDelete(task.id)}
-                >
-                  删除
-                </Button>,
-              ]}
-            >
-              <List.Item.Meta
-                title={
-                  <Space>
-                    <span>小说ID: {task.bookId}</span>
-                    {getStatusTag(task.status)}
-                    <span style={{ color: "#999", fontSize: 12 }}>
-                      {task.createTime}
-                    </span>
-                  </Space>
-                }
-                description={
-                  <div>
-                    <div style={{ marginBottom: 8 }}>
-                      {task.message}
-                      {task.chapterCount > 0 && ` (共${task.chapterCount}章)`}
+                    删除
+                  </Button>,
+                ]}
+              >
+                <List.Item.Meta
+                  title={
+                    <Space>
+                      <span style={{ fontWeight: "bold" }}>
+                        {task.novelName || "小说ID: " + task.bookId}
+                      </span>
+                      {getStatusTag(task.status)}
+                      <span style={{ color: "#999", fontSize: 12 }}>
+                        {task.createTime}
+                      </span>
+                    </Space>
+                  }
+                  description={
+                    <div>
+                      <div style={{ marginBottom: 8 }}>
+                        {task.message}
+                        {task.totalChapters &&
+                          task.totalChapters > 0 &&
+                          ` (第${task.currentChapter || 0}章/共${task.totalChapters}章)`}
+                      </div>
+                      {task.status === "running" && (
+                        <Progress
+                          percent={task.progress}
+                          size="small"
+                          status="active"
+                        />
+                      )}
+                      {task.status === "completed" && (
+                        <Progress percent={100} size="small" status="success" />
+                      )}
                     </div>
-                    {task.status === "running" && (
-                      <Progress
-                        percent={task.progress}
-                        size="small"
-                        status="active"
-                      />
-                    )}
-                  </div>
-                }
-              />
-            </List.Item>
-          )}
-        />
+                  }
+                />
+              </List.Item>
+            )}
+          />
+        )}
       </Card>
     </div>
   );

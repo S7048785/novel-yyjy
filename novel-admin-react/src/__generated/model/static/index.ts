@@ -15,7 +15,6 @@ export type {BookReadHistoryView} from './BookReadHistoryView';
 export type {BookStateVO} from './BookStateVO';
 export type {BookSubCommentView} from './BookSubCommentView';
 export type {BookUpdateReq} from './BookUpdateReq';
-export type {CrawlTaskStatus} from './CrawlTaskStatus';
 export type {DashboardStatisticsVO} from './DashboardStatisticsVO';
 export type {HomeBookRankView} from './HomeBookRankView';
 export type {HomeBookView} from './HomeBookView';

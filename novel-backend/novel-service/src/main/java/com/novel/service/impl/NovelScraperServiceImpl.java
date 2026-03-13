@@ -2,22 +2,18 @@ package com.novel.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.novel.bo.CrawlTaskStatus;
+import com.novel.controller.admin.CrawlerController;
 import com.novel.po.book.*;
 import com.novel.service.NovelScraperService;
 import com.novel.utils.NovelScraperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Nyxcirea
@@ -27,10 +23,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Service
 public class NovelScraperServiceImpl implements NovelScraperService {
-	
+
 	@Autowired
 	private JSqlClient sqlClient;
-	
+
 	/**
 	 * 新增小说
 	 *
@@ -68,43 +64,106 @@ public class NovelScraperServiceImpl implements NovelScraperService {
 					.setDelFlag(0);
 		});
 		var dbBookId = sqlClient.save(book).getModifiedEntity().id();
-		
+
 		log.info("新增小说：{}", res.getBookName());
 		return dbBookId;
 	}
-	
+
 	/**
 	 * 爬取小说章节
 	 */
 	@Transactional
 	@Override
-	public void scrapeChapters(String bookId, Long dbBookId, int count) throws Exception {
-		
+	public void scrapeChapters(String bookId, Long dbBookId, Integer count, String taskId) throws Exception {
+
 		Long chapterCount = sqlClient.createQuery(BookChapterTable.$)
 				                    .where(BookChapterTable.$.bookId().eq(dbBookId))
 				                    .selectCount().execute().get(0);
+
+		// 获取小说详情用于显示
+		var bookDetail = NovelScraperUtil.scrapeBookDetail(bookId);
+		String novelName = bookDetail.getBookName();
 		
-		var chapterRes = NovelScraperUtil.scrapeChapters(bookId, chapterCount > 0 ? chapterCount.intValue() : 0, count);
-		var entities = CollUtil.map(chapterRes, (item) -> BookContentDraft.$.produce((draft) -> {
-			draft.setContent(item.getBookContent().getContent())
-					.setChapter(BookChapterDraft.$.produce((chapterDraft) -> {
-						chapterDraft.setBookId(dbBookId)
-								.setChapterNum(item.getBookChapter().getChapterNum() - 1)
-								.setChapterName(item.getBookChapter().getChapterName())
-								.setWordCount(item.getBookChapter().getWordCount())
-								.setVipState(0);
-					}));
-		}), true);
-		var items = sqlClient.saveEntities(entities).getItems();
-		log.info("{} 章节写入成功", items.size());
-		var lastChapter = items.get(items.size() - 1).getModifiedEntity().chapter();
+		int crawlCount = 0;
+		if (count == null || count < 1) {
+			crawlCount = bookDetail.getChapterCount();
+		}
+
+		// 首次推送：开始采集
+		CrawlTaskStatus startStatus = new CrawlTaskStatus(taskId, String.valueOf(dbBookId), crawlCount);
+		startStatus.setMessage("开始采集: " + novelName);
+		startStatus.setNovelId(dbBookId.toString());
+		CrawlerController.pushProgress(taskId, startStatus);
+
+		int startIndex = chapterCount > 0 ? chapterCount.intValue() : 0;
+		var chapterRes = NovelScraperUtil.scrapeChapters(bookId, startIndex, crawlCount);
+
+		int totalChapters = chapterRes.size();
+
+		// 分批保存并推送进度
+		int batchSize = 10;
+		int total = chapterRes.size();
+		int savedCount = 0;
+		long totalWords = 0;
+		BookChapter lastChapter = null;
+
+		for (int i = 0; i < total; i += batchSize) {
+			int end = Math.min(i + batchSize, total);
+			var batchRes = chapterRes.subList(i, end);
+
+			// 构建实体
+			var batchEntities = CollUtil.map(batchRes, (item) -> BookContentDraft.$.produce((draft) -> {
+				draft.setContent(item.getBookContent().getContent())
+						.setChapter(BookChapterDraft.$.produce((chapterDraft) -> {
+							chapterDraft.setBookId(dbBookId)
+									.setChapterNum(item.getBookChapter().getChapterNum() - 1)
+									.setChapterName(item.getBookChapter().getChapterName())
+									.setWordCount(item.getBookChapter().getWordCount())
+									.setVipState(0);
+						}));
+			}), true);
+
+			// 保存批次
+			var items = sqlClient.saveEntities(batchEntities).getItems();
+			savedCount += items.size();
+			totalWords += items.stream().mapToLong(item -> item.getModifiedEntity().chapter().wordCount()).sum();
+			lastChapter = items.get(items.size() - 1).getModifiedEntity().chapter();
+
+			// 推送进度
+			int currentChapter = savedCount;
+			double progress = (double) currentChapter / totalChapters * 100;
+			CrawlTaskStatus status = new CrawlTaskStatus(taskId, String.valueOf(dbBookId), totalChapters);
+			status.setNovelId(dbBookId.toString());
+			status.setNovelName(bookDetail.getBookName());
+			status.setCurrentChapter(currentChapter);
+			status.setTotalChapters(totalChapters);
+			status.setProgress(progress);
+			status.setMessage("正在采集第 " + currentChapter + " 章 / 共 " + totalChapters + " 章");
+			status.setStatus("采集中");
+			CrawlerController.pushProgress(taskId, status);
+		}
+
+		log.info("{} 章节写入成功", savedCount);
+
+		// 更新小说信息
 		var bookTable = BookInfoTable.$;
 		sqlClient.createUpdate(bookTable)
 				.where(bookTable.id().eq(dbBookId))
-				.set(bookTable.wordCount(), entities.stream().mapToLong(item -> item.chapter().wordCount()).sum())
+				.set(bookTable.wordCount(), totalWords)
 				.set(bookTable.lastChapterId(), BigInteger.valueOf(lastChapter.id()))
 				.set(bookTable.lastChapterName(), lastChapter.chapterName())
 				.set(bookTable.lastChapterUpdateTime(), LocalDateTime.now()).execute();
+
+		// 推送完成状态
+		CrawlTaskStatus completeStatus = new CrawlTaskStatus(taskId, String.valueOf(dbBookId), totalChapters);
+		completeStatus.setNovelId(dbBookId.toString());
+		completeStatus.setNovelName(bookDetail.getBookName());
+		completeStatus.setCurrentChapter(totalChapters);
+		completeStatus.setTotalChapters(totalChapters);
+		completeStatus.setProgress(100.0);
+		completeStatus.setMessage("采集完成！共 " + totalChapters + " 章");
+		completeStatus.setStatus("已完成");
+		CrawlerController.pushProgress(taskId, completeStatus);
 	}
-	
+
 }

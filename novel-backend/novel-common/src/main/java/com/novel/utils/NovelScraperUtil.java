@@ -66,6 +66,10 @@ public class NovelScraperUtil {
         Element introP = doc.selectFirst("div.intro_txt p");
         result.setBookDesc(introP != null ? introP.text().trim() : "");
         
+        // 6. 章节数
+        Element indexCountEm = doc.selectFirst("#bookIndexCount");
+        result.setChapterCount(extractNumber(indexCountEm != null ? indexCountEm.text().replaceAll("[^\\d]", "") : "0"));
+        
         // 6. 点击量 (提取数字)
         //Element visitEm = doc.selectFirst("em#cTotal");
         //result.setVisitCount(extractNumber(visitEm != null ? visitEm.text() : "0"));
