@@ -1,9 +1,6 @@
 package com.novel.utils;
 
-import com.novel.bo.BookDetailResult;
-import com.novel.bo.ChapterInfo;
-import com.novel.bo.ChapterResult;
-import com.novel.bo.ContentInfo;
+import com.novel.bo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -96,7 +93,7 @@ public class NovelScraperUtil {
      * @param count   获取数量 (0 表示获取所有)
      * @return 章节列表
      */
-    public static List<ChapterResult> scrapeChapters(String bookId, int start, int count) throws Exception {
+    public static List<ChapterResult> scrapeChapters(String bookId, int start, int count, ProgressCallback callback) throws Exception {
         String listUrl = String.format("http://117.72.165.13:8888/book/indexList-%s.html", bookId);
         String html = restTemplate.getForObject(listUrl, String.class);
         if (html == null) throw new RuntimeException("获取 URL 失败：" + listUrl);
@@ -111,7 +108,7 @@ public class NovelScraperUtil {
         // 限制数量
         int limit = count == 0 ? links.size() : Math.min(start + count, links.size());
         
-        for (int i = start; i < limit; i++) {
+        for (int i = start, j = 0; i < limit; i++, j++) {
             Element link = links.get(i);
             String relativeHref = link.attr("href");
             // 拼接绝对 URL (处理相对路径)
@@ -120,12 +117,17 @@ public class NovelScraperUtil {
             try {
                 ChapterResult chapterData = scrapeSingleChapter(absoluteUrl, i + 1);
                 results.add(chapterData);
+                // 回调进度 (每4章更新一次)
+                if (j % 4 == 0) {
+                    callback.onProgressUpdate(i + 1, limit, (double) i / limit * 100);
+                }
 	            log.info("爬取第 {} 章成功：{}", i + 1, chapterData.getBookChapter().getChapterName());
             } catch (Exception e) {
                 log.error("爬取第 {} 章时出错：{}", i + 1, e.getMessage());
                 // 可以选择继续或抛出异常
             }
         }
+        callback.onProgressUpdate(limit, limit, 1.0);
         return results;
     }
     

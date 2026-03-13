@@ -9,6 +9,7 @@ import com.novel.utils.NovelScraperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,6 +74,7 @@ public class NovelScraperServiceImpl implements NovelScraperService {
 	 * 爬取小说章节
 	 */
 	@Transactional
+	@Async
 	@Override
 	public void scrapeChapters(String bookId, Long dbBookId, Integer count, String taskId) throws Exception {
 
@@ -84,11 +86,13 @@ public class NovelScraperServiceImpl implements NovelScraperService {
 		var bookDetail = NovelScraperUtil.scrapeBookDetail(bookId);
 		String novelName = bookDetail.getBookName();
 		
-		int crawlCount = 0;
+		int crawlCount;
 		if (count == null || count < 1) {
 			crawlCount = bookDetail.getChapterCount();
+		} else {
+			crawlCount = count;
 		}
-
+		
 		// 首次推送：开始采集
 		CrawlTaskStatus startStatus = new CrawlTaskStatus(taskId, String.valueOf(dbBookId), crawlCount);
 		startStatus.setMessage("开始采集: " + novelName);
@@ -96,7 +100,18 @@ public class NovelScraperServiceImpl implements NovelScraperService {
 		CrawlerController.pushProgress(taskId, startStatus);
 
 		int startIndex = chapterCount > 0 ? chapterCount.intValue() : 0;
-		var chapterRes = NovelScraperUtil.scrapeChapters(bookId, startIndex, crawlCount);
+		var chapterRes = NovelScraperUtil.scrapeChapters(bookId, startIndex, crawlCount, (int currentChapter, int totalChapters, double progress) -> {
+			
+			CrawlTaskStatus status = new CrawlTaskStatus(taskId, String.valueOf(dbBookId), crawlCount);
+			status.setNovelId(dbBookId.toString());
+			status.setNovelName(bookDetail.getBookName());
+			status.setCurrentChapter(currentChapter);
+			status.setTotalChapters(totalChapters);
+			status.setProgress(progress);
+			status.setMessage("正在采集第 " + currentChapter + " 章 / 共 " + totalChapters + " 章");
+			status.setStatus("采集中");
+			CrawlerController.pushProgress(taskId, status);
+		});
 
 		int totalChapters = chapterRes.size();
 
@@ -130,17 +145,17 @@ public class NovelScraperServiceImpl implements NovelScraperService {
 			lastChapter = items.get(items.size() - 1).getModifiedEntity().chapter();
 
 			// 推送进度
-			int currentChapter = savedCount;
-			double progress = (double) currentChapter / totalChapters * 100;
-			CrawlTaskStatus status = new CrawlTaskStatus(taskId, String.valueOf(dbBookId), totalChapters);
-			status.setNovelId(dbBookId.toString());
-			status.setNovelName(bookDetail.getBookName());
-			status.setCurrentChapter(currentChapter);
-			status.setTotalChapters(totalChapters);
-			status.setProgress(progress);
-			status.setMessage("正在采集第 " + currentChapter + " 章 / 共 " + totalChapters + " 章");
-			status.setStatus("采集中");
-			CrawlerController.pushProgress(taskId, status);
+			//int currentChapter = savedCount;
+			//double progress = (double) currentChapter / totalChapters * 100;
+			//CrawlTaskStatus status = new CrawlTaskStatus(taskId, String.valueOf(dbBookId), totalChapters);
+			//status.setNovelId(dbBookId.toString());
+			//status.setNovelName(bookDetail.getBookName());
+			//status.setCurrentChapter(currentChapter);
+			//status.setTotalChapters(totalChapters);
+			//status.setProgress(progress);
+			//status.setMessage("正在采集第 " + currentChapter + " 章 / 共 " + totalChapters + " 章");
+			//status.setStatus("采集中");
+			//CrawlerController.pushProgress(taskId, status);
 		}
 
 		log.info("{} 章节写入成功", savedCount);

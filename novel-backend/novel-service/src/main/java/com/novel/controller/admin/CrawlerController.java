@@ -2,20 +2,16 @@ package com.novel.controller.admin;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
 import com.novel.bo.CrawlTaskStatus;
-import com.novel.exception.BaseException;
 import com.novel.result.Result;
 import com.novel.service.NovelScraperService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.babyfish.jimmer.client.meta.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -31,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @SaCheckRole("admin")
 @RequestMapping("/admin/crawler")
 @RestController
+@Slf4j
 public class CrawlerController {
 
 	@Autowired
@@ -46,13 +43,16 @@ public class CrawlerController {
 	public Result<Void> addNovelById(String bookId, Integer chapterCount) {
 		long dbBookId = novelScraperService.addNovelById(bookId);
 
-		try {
-			// 传入SSE emitter用于推送进度
-			novelScraperService.scrapeChapters(bookId, dbBookId, chapterCount, bookId);
-		} catch (Exception e) {
-			//throw new Exception("爬取小说章节失败" + e.getMessage());
-			throw new BaseException("爬取小说章节失败" + e.getMessage());
-		}
+		// 异步执行爬取任务，不阻塞主请求，让SSE能实时推送进度
+			try {
+				novelScraperService.scrapeChapters(bookId, dbBookId, chapterCount, bookId);
+			} catch (Exception e) {
+				log.error("爬取小说章节失败", e);
+				CrawlTaskStatus errorStatus = new CrawlTaskStatus(bookId, String.valueOf(dbBookId), 0);
+				errorStatus.setMessage("采集失败: " + e.getMessage());
+				errorStatus.setStatus("失败");
+				pushProgress(bookId, errorStatus);
+			}
 		return Result.ok();
 	}
 
