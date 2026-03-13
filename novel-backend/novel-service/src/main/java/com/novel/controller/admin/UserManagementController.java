@@ -14,6 +14,7 @@ import com.novel.utils.AliyunOSSUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.babyfish.jimmer.client.meta.Api;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,6 +59,7 @@ public class UserManagementController {
 	}
 
 	@Api
+	@CacheEvict(cacheNames = "dashboardCache")
 	@Operation(summary = "添加用户")
 	@PostMapping
 	public Result<Void> add(@Validated @RequestBody UserAddInput user) {
@@ -74,6 +76,7 @@ public class UserManagementController {
 	}
 
 	@Api
+	@CacheEvict(cacheNames = "dashboardCache")
 	@Operation(summary = "删除用户")
 	@DeleteMapping("/{id}")
 	public Result<Void> delete(@PathVariable long id) {

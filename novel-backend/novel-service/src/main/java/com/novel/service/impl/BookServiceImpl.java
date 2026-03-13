@@ -7,6 +7,8 @@ import com.novel.constant.CacheConstant;
 import com.novel.dto.BookChapterDto;
 import com.novel.dto.BookStateVO;
 import com.novel.dto.req.BookChapterAddReq;
+import com.novel.dto.req.BookPageQueryReq;
+import com.novel.dto.req.BookUpdateReq;
 import com.novel.dto.req.ChapterPageQueryReq;
 import com.novel.po.book.BookInfo;
 import com.novel.po.book.BookInfoTable;
@@ -15,6 +17,7 @@ import com.novel.result.PageResult;
 import com.novel.service.BookService;
 import com.novel.user.dto.book.*;
 import org.babyfish.jimmer.sql.ast.query.Order;
+import org.babyfish.jimmer.sql.fetcher.Fetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -34,7 +37,33 @@ public class BookServiceImpl implements BookService {
 	private BookRepository bookRepository;
 	@Autowired
 	private StringRedisTemplate redisTemplate;
-	
+
+	@Override
+	public PageResult<BookInfo> page(BookPageQueryReq req, Fetcher<BookInfo> fetcher) {
+		return bookRepository.page(req, fetcher);
+	}
+
+	@Override
+	public BookInfo getById(long id, Fetcher<BookInfo> fetcher) {
+		return bookRepository.getBookById(id, fetcher);
+	}
+
+	@Override
+	public void addBook(BookUpdateReq req) {
+		bookRepository.addBook(req);
+	}
+
+	@Override
+	public void updateBook(BookUpdateReq req) {
+		bookRepository.updateBook(req);
+	}
+
+	@Override
+	public void deleteBook(String id) {
+		
+		bookRepository.deleteBook(id);
+	}
+
 	@Override
 	public List<BookCategoryView> listCategory(Integer id) {
 		String jsonStr = redisTemplate.opsForValue().get(CacheConstant.CACHE_BOOK_CATEGORY + id);

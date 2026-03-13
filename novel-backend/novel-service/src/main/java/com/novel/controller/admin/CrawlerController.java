@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api
 @Tag(name = "爬虫控制器")
 @SaCheckRole("admin")
-@RequestMapping("/crawler")
+@RequestMapping("/admin/crawler")
 @RestController
 public class CrawlerController {
 	
@@ -29,7 +29,7 @@ public class CrawlerController {
 	
 	@Api
 	@CacheEvict(cacheNames = "dashboardCache")
-	@Operation(summary = "根据小说ID新增小说")
+	@Operation(summary = "根据小说ID新增小说和章节")
 	@PostMapping("/")
 	public Result<Void> addNovelById(String bookId, Integer chapterCount) {
 		long dbBookId = novelScraperService.addNovelById(bookId);
@@ -41,4 +41,5 @@ public class CrawlerController {
 		}
 		return Result.ok();
 	}
+	
 }

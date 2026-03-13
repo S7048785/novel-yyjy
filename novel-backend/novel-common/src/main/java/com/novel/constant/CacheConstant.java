@@ -4,4 +4,5 @@ public class CacheConstant {
 	public static final String CACHE_NEWS_LATEST = "news:latest";
 	public static final String CACHE_HOME_BOOKS = "home:books";
 	public static final String CACHE_BOOK_CATEGORY = "home:category:";
+	public static final String CACHE_NOVEL_CRAWL_TASK = "novel:crawl:task:";
 }

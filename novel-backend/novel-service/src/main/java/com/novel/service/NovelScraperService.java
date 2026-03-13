@@ -6,4 +6,5 @@ public interface NovelScraperService {
 	
 	
 	void scrapeChapters(String bookId, Long dbBookId, int count) throws Exception;
+	
 }

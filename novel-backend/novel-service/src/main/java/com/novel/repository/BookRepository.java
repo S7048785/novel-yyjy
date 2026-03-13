@@ -3,6 +3,8 @@ package com.novel.repository;
 import cn.hutool.core.collection.CollUtil;
 import com.novel.dto.BookChapterDto;
 import com.novel.dto.req.BookChapterAddReq;
+import com.novel.dto.req.BookPageQueryReq;
+import com.novel.dto.req.BookUpdateReq;
 import com.novel.dto.req.ChapterPageQueryReq;
 import com.novel.exception.BaseException;
 import com.novel.po.Fetchers;
@@ -17,6 +19,7 @@ import org.babyfish.jimmer.sql.JSqlClient;
 import org.babyfish.jimmer.sql.ast.Predicate;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.babyfish.jimmer.sql.ast.query.Order;
+import org.babyfish.jimmer.sql.fetcher.Fetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,88 @@ public class BookRepository {
 	
 	public BookInfoView findBookInfoById(long bookId) {
 		return sqlClient.findById(BookInfoView.class, bookId);
+	}
+
+	/**
+	 * 分页查询小说列表
+	 */
+	public PageResult<BookInfo> page(BookPageQueryReq req, Fetcher<BookInfo> fetcher) {
+		var page = sqlClient.createQuery(bookInfo)
+				.where(bookInfo.bookName().likeIf(req.getBookName()))
+				.where(bookInfo.authorName().likeIf(req.getAuthorName()))
+				.where(bookInfo.categoryId().eqIf(req.getCategoryId()))
+				.where(bookInfo.bookStatus().eqIf(req.getBookStatus()))
+				.orderBy(bookInfo.id().desc())
+				.select(bookInfo.fetch(fetcher))
+				.fetchPage(req.getPageNum() - 1, req.getPageSize());
+		return new PageResult<>(req.getPageNum(), req.getPageSize(), page.getTotalRowCount(), page.getRows());
+	}
+
+	/**
+	 * 根据ID获取小说详情
+	 */
+	public BookInfo getBookById(long id, Fetcher<BookInfo> fetcher) {
+		return sqlClient.findById(fetcher, id);
+	}
+
+	/**
+	 * 新增小说
+	 */
+	@Transactional
+	public void addBook(BookUpdateReq req) {
+		
+		var category = sqlClient.findById(BookCategory.class, req.getCategoryId());
+		if (category == null) {
+			throw new BaseException("未知类别ID");
+		}
+		var bookDraft = BookInfoDraft.$.produce(draft -> {
+			draft.setId(Long.parseLong(req.getId()))
+					.setWorkDirection(req.getWorkDirection())
+					.setCategoryId(req.getCategoryId())
+					.setCategoryName(category.name())
+					.setPicUrl(req.getPicUrl())
+					.setBookName(req.getBookName())
+					.setAuthorId(BigInteger.valueOf(0))
+					.setAuthorName(req.getAuthorName())
+					.setBookDesc(req.getBookDesc())
+					.setScore(0)
+					.setBookStatus(0)
+					.setVipState(0)
+					.setVisitCount(0L)
+					.setWordCount(0L)
+					.setCommentCount(0L);
+		});
+		sqlClient.save(bookDraft, SaveMode.INSERT_ONLY);
+	}
+
+	/**
+	 * 修改小说
+	 */
+	@Transactional
+	public void updateBook(BookUpdateReq req) {
+		sqlClient.createUpdate(bookInfo)
+				.where(bookInfo.id().eq(Long.valueOf(req.getId())))
+				.set(bookInfo.workDirection(), req.getWorkDirection())
+				.set(bookInfo.categoryId(), req.getCategoryId())
+				.set(bookInfo.picUrl(), req.getPicUrl())
+				.set(bookInfo.bookName(), req.getBookName())
+				.set(bookInfo.authorName(), req.getAuthorName())
+				.set(bookInfo.bookDesc(), req.getBookDesc())
+				.set(bookInfo.bookStatus(), req.getBookStatus())
+				.execute();
+	}
+
+	/**
+	 * 删除小说
+	 */
+	public void deleteBook(String id) {
+		boolean isExists = sqlClient.createQuery(BookChapterTable.$)
+				         .where(BookChapterTable.$.bookId().eq(Long.valueOf(id)))
+						         .exists();
+		if (isExists) {
+			throw new BaseException("小说下存在章节，不能删除");
+		}
+		sqlClient.deleteById(BookInfo.class, id);
 	}
 	
 	/**

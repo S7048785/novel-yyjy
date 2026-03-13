@@ -1,17 +1,23 @@
 package com.novel.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.novel.bo.CrawlTaskStatus;
 import com.novel.po.book.*;
 import com.novel.service.NovelScraperService;
 import com.novel.utils.NovelScraperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Nyxcirea
@@ -47,21 +53,18 @@ public class NovelScraperServiceImpl implements NovelScraperService {
 						default -> 7L;
 					}
 			);
-			LocalDateTime now = LocalDateTime.now();
 			draft.setCategoryName(category)
-					.setPicUrl(res.getPicUrl())
+					.setPicUrl("http://117.72.165.13:8888" + res.getPicUrl())
 					.setBookName(res.getBookName())
 					.setAuthorId(BigInteger.valueOf(0L))
 					.setAuthorName(res.getAuthorName())
 					.setBookDesc(res.getBookDesc())
-					.setScore(5)
+					.setScore(0)
 					.setBookStatus(0)
 					.setVisitCount(0)
 					.setWordCount(0)
 					.setCommentCount(0)
 					.setVipState(0)
-					.setCreateTime(now)
-					.setUpdateTime(now)
 					.setDelFlag(0);
 		});
 		var dbBookId = sqlClient.save(book).getModifiedEntity().id();
@@ -103,4 +106,5 @@ public class NovelScraperServiceImpl implements NovelScraperService {
 				.set(bookTable.lastChapterName(), lastChapter.chapterName())
 				.set(bookTable.lastChapterUpdateTime(), LocalDateTime.now()).execute();
 	}
+	
 }

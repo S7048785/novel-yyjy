@@ -3,6 +3,8 @@ package com.novel.vo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * @author Nyxcirea
  * date 2026/3/12
@@ -10,7 +12,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class DashboardStatisticsVO {
+public class DashboardStatisticsVO implements Serializable {
 	private Long novelCount;
 	private Long chapterCount;
 	private Long userCount;
