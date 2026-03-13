@@ -2,6 +2,7 @@ import type {Executor} from './';
 import {
     AdminController, 
     BookController, 
+    BookManagementController, 
     CaptchaController, 
     ChapterCommentController, 
     CommentController, 
@@ -15,6 +16,8 @@ import {
 export class Api {
     
     readonly adminController: AdminController
+    
+    readonly bookManagementController: BookManagementController
     
     readonly crawlerController: CrawlerController
     
@@ -36,6 +39,7 @@ export class Api {
     
     constructor(executor: Executor) {
         this.adminController = new AdminController(executor);
+        this.bookManagementController = new BookManagementController(executor);
         this.crawlerController = new CrawlerController(executor);
         this.userManagementController = new UserManagementController(executor);
         this.bookController = new BookController(executor);

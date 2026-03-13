@@ -1,5 +1,6 @@
 export {AdminController} from './AdminController';
 export {BookController} from './BookController';
+export {BookManagementController} from './BookManagementController';
 export {CaptchaController} from './CaptchaController';
 export {ChapterCommentController} from './ChapterCommentController';
 export {CommentController} from './CommentController';

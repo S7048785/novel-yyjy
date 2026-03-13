@@ -32,12 +32,12 @@ const menuItems: MenuProps["items"] = [
     label: <Link to="/app/dashboard">仪表盘</Link>,
   },
   {
-    key: "/app/books",
+    key: "/app/book",
     icon: <BookOutlined />,
     label: <Link to="/app/book">小说管理</Link>,
   },
   {
-    key: "/app/chapters",
+    key: "/app/chapter",
     icon: <ReadOutlined />,
     label: <Link to="/app/chapter">章节管理</Link>,
   },

@@ -16,12 +16,10 @@ function RootComponent() {
         if (res.code == 1) {
           setUser(res.data);
         } else {
-          logout();
-          navigate({
-            to: "/login",
-          });
+          throw new Error();
         }
       } catch (error) {
+        logout();
         message.error("获取用户信息失败");
         navigate({
           to: "/login",
