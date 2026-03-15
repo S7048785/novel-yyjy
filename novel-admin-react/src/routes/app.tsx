@@ -2,6 +2,7 @@ import {
   createFileRoute,
   Link,
   Outlet,
+  redirect,
   useLocation,
   useNavigate,
 } from "@tanstack/react-router";
@@ -21,6 +22,7 @@ import { ProgressBar } from "../components/ProgressBar.tsx";
 import { ThemeToggle } from "../components/ThemeToggle.tsx";
 import { useState } from "react";
 import { useUserStore } from "../lib/userStore";
+import { api } from "@/ApiInstance.ts";
 
 const { Header, Sider, Content } = Layout;
 
@@ -29,27 +31,47 @@ const menuItems: MenuProps["items"] = [
   {
     key: "/app/dashboard",
     icon: <DashboardOutlined />,
-    label: <Link to="/app/dashboard">仪表盘</Link>,
+    label: (
+      <Link to="/app/dashboard" preload={false}>
+        仪表盘
+      </Link>
+    ),
   },
   {
     key: "/app/book",
     icon: <BookOutlined />,
-    label: <Link to="/app/book">小说管理</Link>,
+    label: (
+      <Link to="/app/book" preload={false}>
+        小说管理
+      </Link>
+    ),
   },
   {
     key: "/app/chapter",
     icon: <ReadOutlined />,
-    label: <Link to="/app/chapter">章节管理</Link>,
+    label: (
+      <Link to="/app/chapter" preload={false}>
+        章节管理
+      </Link>
+    ),
   },
   {
     key: "/app/users",
     icon: <UserOutlined />,
-    label: <Link to="/app/users">用户管理</Link>,
+    label: (
+      <Link to="/app/users" preload={false}>
+        用户管理
+      </Link>
+    ),
   },
   {
     key: "/app/crawler",
     icon: <CloudDownloadOutlined />,
-    label: <Link to="/app/crawler">小说采集</Link>,
+    label: (
+      <Link to="/app/crawler" preload={false}>
+        小说采集
+      </Link>
+    ),
   },
 ];
 
@@ -158,4 +180,16 @@ export function AppLayout() {
 // App 布局路由
 export const Route = createFileRoute("/app")({
   component: AppLayout,
+  beforeLoad: async () => {
+    const user = useUserStore.getState().userInfo;
+    if (user) return { user };
+    // 获取用户信息
+    const res = await api.adminController.me();
+    if (res.code == 1) {
+      useUserStore.getState().setUser(res.data);
+      return {
+        user: res.data,
+      };
+    }
+  },
 });

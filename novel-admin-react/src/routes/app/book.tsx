@@ -1,4 +1,4 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Table,
@@ -6,12 +6,10 @@ import {
   Input,
   Space,
   Drawer,
-  InputNumber,
   Select,
   message,
   Popconfirm,
   Tag,
-  Avatar,
   Card,
   Form,
   Row,
@@ -24,8 +22,6 @@ import {
   SearchOutlined,
   EditOutlined,
   DeleteOutlined,
-  BookOutlined,
-  LoadingOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -456,6 +452,6 @@ export function Books() {
   );
 }
 
-export const Route = createFileRoute("/app/book/")({
+export const Route = createFileRoute("/app/book")({
   component: Books,
 });

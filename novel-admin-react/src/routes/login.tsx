@@ -38,9 +38,6 @@ function LoginPage() {
       if (data.code === 1) {
         message.success("登录成功");
         // 使用 userStore 保存用户信息
-        if (data.data) {
-          setUser(data.data);
-        }
         // 跳转到仪表盘
         navigate({ to: "/app/dashboard" });
       } else {

@@ -14,33 +14,21 @@ interface UserState {
   logout: () => void;
 }
 
-export const useUserStore = create<UserState>()(
-  persist(
-    (set) => ({
+export const useUserStore = create<UserState>()((set) => ({
+  userInfo: null,
+  isAuthenticated: false,
+
+  setUser: (user: UserLoginView) => {
+    set({
+      userInfo: user,
+      isAuthenticated: true,
+    });
+  },
+
+  logout: () => {
+    set({
       userInfo: null,
-      token: null,
       isAuthenticated: false,
-
-      setUser: (user: UserLoginView) => {
-        set({
-          userInfo: user,
-          isAuthenticated: true,
-        });
-      },
-
-      logout: () => {
-        set({
-          userInfo: null,
-          isAuthenticated: false,
-        });
-      },
-    }),
-    {
-      name: "user-storage",
-      partialize: (state) => ({
-        userInfo: state.userInfo,
-        isAuthenticated: state.isAuthenticated,
-      }),
-    },
-  ),
-);
+    });
+  },
+}));

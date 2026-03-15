@@ -1,4 +1,4 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Table,
@@ -308,6 +308,6 @@ export function Chapters() {
   );
 }
 
-export const Route = createFileRoute("/app/chapter/")({
+export const Route = createFileRoute("/app/chapter")({
   component: Chapters,
 });

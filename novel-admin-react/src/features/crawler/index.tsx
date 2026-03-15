@@ -1,25 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import {
-  Card,
-  Form,
-  InputNumber,
-  Input,
-  Button,
-  List,
-  Tag,
-  Space,
-  message,
-  Progress,
-  Alert,
-} from "antd";
-import {
-  CloudDownloadOutlined,
-  DeleteOutlined,
-  CheckCircleOutlined,
-} from "@ant-design/icons";
-import { api } from "../../../ApiInstance";
-import type { CrawTaskStatus } from "../../../types/CrawlTaskStatus";
+import { Card, Form, Button, List, Tag, Space, message, Progress } from "antd";
+import { DeleteOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { api } from "@/ApiInstance";
+import type { CrawTaskStatus } from "@/types/CrawlTaskStatus";
+import CrawlerForm from "./components/CrawlerForm";
 
 // 采集任务类型
 interface CrawlerTask {
@@ -54,11 +38,6 @@ export function Crawler() {
   // 连接SSE获取进度
   const connectSSE = (bookId: string, taskId: number): Promise<void> => {
     return new Promise((resolve) => {
-      // 如果已有连接，先关闭
-      if (sseRef.current) {
-        sseRef.current.close();
-      }
-
       const BASE_URL =
         import.meta.env.VITE_API_BASE_URL || "http://localhost:9111";
       const eventSource = new EventSource(
@@ -83,9 +62,7 @@ export function Crawler() {
 
           // 根据消息类型处理 - 找到正在运行的任务进行更新
           setTasks((prev) => {
-            const runningTaskIndex = prev.findIndex(
-              (t) => t.status === "running",
-            );
+            const runningTaskIndex = prev.findIndex((t) => t.bookId === bookId);
             if (runningTaskIndex === -1) return prev;
 
             const newTasks = [...prev];
@@ -196,54 +173,8 @@ export function Crawler() {
   return (
     <div>
       <h2 style={{ marginBottom: 16 }}>小说采集</h2>
-
       {/* 采集表单 */}
-      <Card style={{ marginBottom: 24 }}>
-        <Alert
-          message="使用说明"
-          description="请输入要采集的小说ID，选择要采集的章节数量（可选，默认全部），然后点击开始采集。"
-          type="info"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
-        <Form
-          form={form}
-          layout="inline"
-          onFinish={handleCrawl}
-          style={{ flexWrap: "nowrap" }}
-        >
-          <Form.Item
-            name="bookId"
-            label="小说ID"
-            rules={[{ required: true, message: "请输入小说ID" }]}
-            style={{ marginRight: 16 }}
-          >
-            <Input placeholder="请输入小说ID" style={{ width: 200 }} />
-          </Form.Item>
-          <Form.Item
-            name="chapterCount"
-            label="章节数量"
-            style={{ marginRight: 16 }}
-          >
-            <InputNumber
-              min={1}
-              placeholder="可选，默认全部"
-              style={{ width: 150 }}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              icon={<CloudDownloadOutlined />}
-              loading={loading}
-            >
-              开始采集
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
-
+      <CrawlerForm form={form} handleCrawl={handleCrawl} loading={loading} />
       {/* 任务列表 */}
       <Card title="采集任务">
         {tasks.length === 0 ? (
@@ -317,7 +248,3 @@ export function Crawler() {
     </div>
   );
 }
-
-export const Route = createFileRoute("/app/crawler/")({
-  component: Crawler,
-});
