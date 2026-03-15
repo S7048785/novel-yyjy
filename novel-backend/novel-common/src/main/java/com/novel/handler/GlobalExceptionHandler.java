@@ -2,10 +2,11 @@ package com.novel.handler;
 
 import cn.dev33.satoken.exception.NotLoginException;
 import com.novel.exception.BaseException;
-import com.novel.exception.UserAlreadyExistsException;
 import com.novel.result.Result;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,9 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Hidden
 @Slf4j
@@ -56,7 +55,8 @@ public class GlobalExceptionHandler {
 	}
 	
 	@ExceptionHandler
-	public Result handleNotLoginException(NotLoginException e) {
-		return Result.fail(e.getMessage());
+	public ResponseEntity<String> handleNotLoginException(NotLoginException e) {
+		// 返回 401 状态码和错误信息
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 	}
 }

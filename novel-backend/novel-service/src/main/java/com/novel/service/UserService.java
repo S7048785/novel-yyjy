@@ -32,7 +32,7 @@ public interface UserService {
 	
 	void updateUser(UserUpdateReq user);
 	
-	void delete(Long id);
+	void delete(String id);
 	
 	PageResult<UserInfo> page(UserPageQueryReq req);
 	

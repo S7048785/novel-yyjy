@@ -1,6 +1,7 @@
 package com.novel.controller.admin;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.stp.StpUtil;
 import com.novel.bo.CrawlTaskStatus;
 import com.novel.result.Result;
 import com.novel.service.NovelScraperService;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -24,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Api
 @Tag(name = "爬虫控制器")
-@SaCheckRole("admin")
 @RequestMapping("/admin/crawler")
 @RestController
 @Slf4j
@@ -37,13 +38,17 @@ public class CrawlerController {
 	private static final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
 
 	@Api
-	@CacheEvict(cacheNames = "dashboardCache")
+	@CacheEvict(cacheNames = "dashboardCache", allEntries = true)
 	@Operation(summary = "根据小说ID新增小说和章节")
 	@PostMapping("/")
 	public Result<Void> addNovelById(String bookId, Integer chapterCount) {
-		long dbBookId = novelScraperService.addNovelById(bookId);
-
-		// 异步执行爬取任务，不阻塞主请求，让SSE能实时推送进度
+		StpUtil.checkRole("admin");
+		CompletableFuture.runAsync(() -> {
+			// 业务逻辑
+			long dbBookId = novelScraperService.addNovelById(bookId);
+			
+			
+			// 异步执行爬取任务，不阻塞主请求，让SSE能实时推送进度
 			try {
 				novelScraperService.scrapeChapters(bookId, dbBookId, chapterCount, bookId);
 			} catch (Exception e) {
@@ -53,6 +58,8 @@ public class CrawlerController {
 				errorStatus.setStatus("失败");
 				pushProgress(bookId, errorStatus);
 			}
+		});
+		
 		return Result.ok();
 	}
 
@@ -60,6 +67,7 @@ public class CrawlerController {
 	 * SSE接口：实时推送采集进度
 	 */
 	@Api
+	@SaCheckRole("admin")
 	@Operation(summary = "实时推送采集进度")
 	@GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public SseEmitter stream(@RequestParam String bookId) {

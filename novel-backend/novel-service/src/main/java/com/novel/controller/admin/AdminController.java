@@ -41,7 +41,7 @@ public class AdminController {
 	@Api
 	@Operation(summary = "管理员登录")
 	@PostMapping("/login")
-	public Result<UserLoginView> login(HttpServletRequest request, @Validated @RequestBody AdminLoginReq loginReq) {
+	public Result<Void> login(HttpServletRequest request, @Validated @RequestBody AdminLoginReq loginReq) {
 		String captcha = (String) request.getSession().getAttribute("captcha");
 		String captcha1 = loginReq.getCaptcha();
 		log.info("captcha: {}, captcha1: {}", captcha, captcha1);
@@ -52,11 +52,12 @@ public class AdminController {
 		UserLoginView user = userService.loginForAdmin(loginReq);
 		
 		StpUtil.login(user.getId());
-		return Result.ok(user);
+		return Result.ok();
 	}
 	
 	@Api
-	@Operation(summary = "获取登录信息")
+	@SaCheckRole("admin")
+	@Operation(summary = "获取管理员登录信息")
 	@GetMapping("/me")
 	public Result<UserInfoView> me() {
 		UserInfoView user = userService.getUserInfo();
@@ -64,6 +65,7 @@ public class AdminController {
 	}
 	
 	@Api
+	@SaCheckRole("admin")
 	@Operation(summary = "退出登录")
 	@PostMapping("/logout")
 	public Result<Void> logout() {

@@ -79,7 +79,7 @@ public class UserManagementController {
 	@CacheEvict(cacheNames = "dashboardCache")
 	@Operation(summary = "删除用户")
 	@DeleteMapping("/{id}")
-	public Result<Void> delete(@PathVariable long id) {
+	public Result<Void> delete(@PathVariable String id) {
 		userService.delete(id);
 		return Result.ok();
 	}

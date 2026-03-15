@@ -110,8 +110,8 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	public void delete(Long id) {
-		userRepository.delete(id);
+	public void delete(String id) {
+		userRepository.delete(Long.parseLong(id));
 	}
 	
 	@Override
