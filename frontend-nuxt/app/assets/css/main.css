@@ -1,0 +1,23 @@
+﻿@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme {
+  --font-sans: "Public Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --ui-primary: var(--color-cyan-500);
+  --color-midnight: #4699ec;
+  --color-tahiti: #3ab7bf;
+  --color-bermuda: #78dcca;
+  /* --ui-text-primary: var(--color-cyan-600); */
+}
+
+:root {
+  --ui-bg: #f6f7f8;
+  --ui-text-primary: var(--color-cyan-600);
+  --ui-secondary: white;
+}
+
+.dark {
+  --ui-bg: #111921;
+  --ui-secondary: #17212e;
+}

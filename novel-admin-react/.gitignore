@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# ridiculous AIs
+.agent/
+.agents/
+.claude/
+.codex/
+.cursor/
+.gemini/
