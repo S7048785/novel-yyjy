@@ -17,7 +17,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -43,23 +42,24 @@ public class CrawlerController {
 	@PostMapping("/")
 	public Result<Void> addNovelById(String bookId, Integer chapterCount) {
 		StpUtil.checkRole("admin");
-		CompletableFuture.runAsync(() -> {
-			// 业务逻辑
-			long dbBookId = novelScraperService.addNovelById(bookId);
-			
-			
-			// 异步执行爬取任务，不阻塞主请求，让SSE能实时推送进度
-			try {
-				novelScraperService.scrapeChapters(bookId, dbBookId, chapterCount, bookId);
-			} catch (Exception e) {
-				log.error("爬取小说章节失败", e);
-				CrawlTaskStatus errorStatus = new CrawlTaskStatus(bookId, String.valueOf(dbBookId), 0);
-				errorStatus.setMessage("采集失败: " + e.getMessage());
-				errorStatus.setStatus("失败");
-				pushProgress(bookId, errorStatus);
-			}
-		});
+		// 业务逻辑
+		long dbBookId = novelScraperService.addNovelById(bookId);
 		
+		
+		// 异步执行爬取任务，不阻塞主请求，让SSE能实时推送进度
+		try {
+			novelScraperService.scrapeChapters(bookId, dbBookId, chapterCount, bookId);
+			
+			// 主动关闭 SSE 连接
+			closeEmitter(bookId);
+		} catch (Exception e) {
+			log.error("爬取小说章节失败", e);
+			CrawlTaskStatus errorStatus = new CrawlTaskStatus(bookId, String.valueOf(dbBookId), 0);
+			errorStatus.setMessage("采集失败: " + e.getMessage());
+			errorStatus.setStatus("失败");
+			pushProgress(bookId, errorStatus);
+			closeEmitter(bookId);
+		}
 		return Result.ok();
 	}
 
@@ -79,6 +79,7 @@ public class CrawlerController {
 		emitter.onTimeout(() -> emitters.remove(bookId));
 		emitter.onError(e -> emitters.remove(bookId));
 
+		
 		// 初始连接发送空消息保持连接
 		try {
 			emitter.send(SseEmitter.event()
@@ -104,9 +105,19 @@ public class CrawlerController {
 					.data(status)
 					.build());
 			} catch (IOException e) {
-				emitters.remove(bookId);
+				closeEmitter(bookId);
 			}
 		}
 	}
-
+	
+	/**
+	 * 关闭指定 bookId 的 SSE 连接
+	 */
+	public static void closeEmitter(String bookId) {
+		SseEmitter emitter = emitters.remove(bookId);
+		if (emitter != null) {
+			emitter.complete();
+		}
+	}
+	
 }

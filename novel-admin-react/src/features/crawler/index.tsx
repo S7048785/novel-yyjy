@@ -76,6 +76,26 @@ export function Crawler() {
                 message: data.message,
                 novelName: data.novelName || task.novelName,
               };
+              // 任务完成，关闭连接
+              if (sseRef.current) {
+                sseRef.current.close();
+                sseRef.current = null;
+                console.log("任务完成，SSE连接已关闭");
+              }
+            } else if (data.status === "失败" || data.status === "failed") {
+              newTasks[runningTaskIndex] = {
+                ...task,
+                status: "failed",
+                progress: 0,
+                message: data.message || "采集失败",
+                novelName: data.novelName || task.novelName,
+              };
+              // 任务失败，关闭连接
+              if (sseRef.current) {
+                sseRef.current.close();
+                sseRef.current = null;
+                console.log("任务失败，SSE连接已关闭");
+              }
             } else if (data.status === "采集中" || data.status === "running") {
               newTasks[runningTaskIndex] = {
                 ...task,
